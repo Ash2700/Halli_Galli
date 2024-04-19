@@ -1,8 +1,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const passport = require('./config/passport')
 const app = express()
-const router = express.Router()
+const router = require('./routes')
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 
