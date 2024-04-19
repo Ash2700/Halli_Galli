@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "-": "^0.0.1",
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.9.6",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "sequelize": "^6.37.3",
+    "sequelize-cli": "^6.6.2",
+    "y": "^0.3.2"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0"
+  }
+}
