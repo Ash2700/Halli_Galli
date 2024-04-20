@@ -1,3 +1,5 @@
+const env = require('dotenv').config
+env()
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
@@ -12,3 +14,4 @@ app.listen(PORT, ()=>{
   console.log(`HALLI GALLI server on port ${PORT}`)
 })
 
+module.exports = app

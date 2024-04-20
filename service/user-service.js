@@ -30,7 +30,7 @@ const userService = {
     // 檢查
     checkHelper.isExist(email, 'email must to be', 400)
     checkHelper.isExist(password, 'password must to be', 400)
-    User.findOne({ where: { email }, raw: true })
+    return User.findOne({ where: { email }, raw: true })
     .then(user => {
       const isSame = bcrypt.compare(password, user.password)
       if(user && isSame ){

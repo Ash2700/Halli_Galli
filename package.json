@@ -16,6 +16,9 @@
     "sequelize-cli": "^6.6.2"
   },
   "devDependencies": {
-    "eslint": "^9.0.0"
+    "eslint": "^9.0.0",
+    "mocha": "^10.4.0",
+    "sinon": "^17.0.1",
+    "supertest": "^6.3.4"
   }
 }
