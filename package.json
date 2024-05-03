@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "dev": "",
+    "dev": "nodemon app.js",
     "test": "jest"
   },
   "dependencies": {
@@ -14,7 +14,8 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "sequelize": "^6.37.3",
-    "sequelize-cli": "^6.6.2"
+    "sequelize-cli": "^6.6.2",
+    "socket.io": "^4.7.5"
   },
   "devDependencies": {
     "eslint": "^9.0.0",

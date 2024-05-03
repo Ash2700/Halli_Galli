@@ -1,16 +1,26 @@
-const env = require('dotenv').config
-env()
+require('dotenv').config()
+
 const express = require('express')
-const bodyParser = require('body-parser')
 const app = express()
-const router = require('./routes')
+
+const http = require('http')
+const server = http.createServer(app)
+
+const socketManager = require('./helpers/socketManager') 
+socketManager.init(server)
+
+const bodyParser = require('body-parser')
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 
+const path = require('path')
+app.use(express.static(path.join(__dirname, 'public')))
+
+const router = require('./routes')
 app.use(router)
 
 const PORT = process.env.PORT || 3000
-app.listen(PORT, ()=>{
+server.listen(PORT, ()=>{
   console.log(`HALLI GALLI server on port ${PORT}`)
 })
 

@@ -1,0 +1,32 @@
+/* styles.css */
+body {
+  font-family: Arial, sans-serif;
+}
+
+#lobby {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+#rooms {
+  flex-grow: 1;
+  border-right: 1px solid #ccc;
+  padding-right: 20px;
+}
+
+#rooms div.selected {
+  border: 2px solid blue;
+  padding: 5px;
+}
+
+#controls {
+  flex-basis: 200px;
+  padding-left: 20px;
+}
+
+button {
+  display: block;
+  margin: 10px 0;
+  width: 100%;
+}
