@@ -1,24 +1,19 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Lobby</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <title>Enter Game Lobby</title>
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-    <div id="lobby">
-        <div id="rooms">
-            <!-- 房間列表會在這裡動態生成 -->
-        </div>
-        <div id="controls">
-            <input type="text" id="newRoomName" placeholder="Enter room name">
-            <button id="createRoom">Create Room</button>
-            <button id="leaveLobby">Leave Lobby</button>
-        </div>
-    </div>
+    <h1>Welcome to the Halli Galli</h1>
+    <form id="loginForm">
+        <input type="text" id="playerName" placeholder="Enter your name" required>
+        <button type="submit">Enter Lobby</button>
+    </form>
 
-    <script src="/javascript/app.js"></script>
+    <script src="/javascript/index.js"></script>
 </body>
 </html>

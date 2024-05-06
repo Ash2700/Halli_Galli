@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Room</title>
+    <link rel="stylesheet" href="/css/gameRoom.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <header>
+        <p>ID: <span id="show-id"></span></p>
+        <p>Name: <span id="show-name"></span></p>
+    </header>
+    <div id="game-area">
+        <h2>Waiting for Players...</h2>
+        <div id="player-list">Players will be listed here...</div>
+    </div>
+    <aside>
+        <button id="ready-button">Ready</button>
+        <button id="start-game" disabled>Start Game</button>
+    </aside>
+    <footer>
+        <p id="message-area">Messages will appear here...</p>
+    </footer>
+
+    <script src="/javascript/gameRoom.js"></script>
+</body>
+</html>

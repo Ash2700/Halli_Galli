@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Lobby</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <header >
+        <p>
+        id: 
+            <span id="show-id"></span>,
+        name: 
+            <span id="show-name"></span>
+        </p>
+
+    </header>
+    <div id="lobby">
+        <div id="rooms">
+            <!-- 房間列表會在這裡動態生成 -->
+        </div>
+        <div id="controls">
+            <input type="text" id="newRoomName" placeholder="Enter room name">
+            <button id="createRoom">Create Room</button>
+            <button id="joinRoom">Join Room</button>
+            <button id="leaveLobby">Leave Lobby</button>
+        </div>
+    </div>
+
+    <script src="/javascript/lobby.js"></script>
+</body>
+</html>

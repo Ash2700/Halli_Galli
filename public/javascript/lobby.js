@@ -1,5 +1,20 @@
+
 // app.js
+const playerId = getCookie('playerId')
+const playerName = getCookie('playerName')
+
+document.getElementById('show-id').innerHTML = playerId
+document.getElementById('show-name').innerHTML = playerName
+
+
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
 document.addEventListener('DOMContentLoaded', function () {
+  
   const socket = io('http://localhost:3000');
 
   // socket 建立
@@ -10,38 +25,42 @@ document.addEventListener('DOMContentLoaded', function () {
   socket.on('message', (data) => {
     console.log('Message from server:', data);
   });
-
-  // document.getElementById('joinRoom').addEventListener('click', () => {
-  //   const roomId = document.getElementById('roomId').value;
-  //   const playerId = 'player123';  // 應從用戶會話獲得
-  //   socket.emit('joinRoom', { roomId, playerId });
-  // });
+  socket.emit('callRooms',() => {
+    console.log('give Rooms')
+  })
+  // 送加入房間
+  document.getElementById('joinRoom').addEventListener('click', () => {
+    const roomId = selectedRoomId;
+    socket.emit('joinRoom', { roomId, playerId });
+  });
   
-  // socket.on('roomJoined', data => {
-  //   console.log('Joined room', data.room);
-  //   // 跳轉到遊戲界面或顯示房間內的其他玩家
-  // });
-  
-  
+  socket.on('joinRoomResponse',(response)=>{
+    if(response.success){
+      window.location.href = `/gameRoom.html?roomId=${response.roomId}`
+    }
+  })
   
   const createRoomButton = document.getElementById('createRoom');
   const newRoomNameInput = document.getElementById('newRoomName');
   createRoomButton.addEventListener('click', () => {
-    console.log('23')
-    const hostId = '1'
     const name = newRoomNameInput.value;
-    socket.emit('createRoom', { name, hostId });
+    socket.emit('createRoom', { name, hostId:playerId });
   });
   
   const roomsContainer = document.getElementById('rooms');
+  let selectedRoomId = null;
   socket.on('updateRooms', (rooms) => {
     roomsContainer.innerHTML = '';
     rooms.forEach(room => {
       const roomDiv = document.createElement('div');
       roomDiv.textContent = `Room ${room.name} (${room.players.length}/6 players)`;
+      roomDiv.dataset.roomId = room.id;
       roomDiv.onclick = () => {
+        document.querySelectorAll('#rooms div').forEach(div =>{
+          div.classList.remove('selected');
+        })
         roomDiv.classList.add('selected');
-        socket.emit('joinRoom', { roomId: room.id });
+        selectedRoomId = room.id
       };
       roomsContainer.appendChild(roomDiv);
     });

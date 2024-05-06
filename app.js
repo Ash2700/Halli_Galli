@@ -16,6 +16,7 @@ app.use(bodyParser.json())
 const path = require('path')
 app.use(express.static(path.join(__dirname, 'public')))
 
+
 const router = require('./routes')
 app.use(router)
 

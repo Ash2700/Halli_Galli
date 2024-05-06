@@ -1,0 +1,23 @@
+/* styles.css */
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+header, footer {
+  margin: 10px;
+}
+
+#game-area {
+  padding: 20px;
+  border: 1px solid #ccc;
+  margin: 10px;
+}
+
+aside {
+  display: flex;
+  flex-direction: column;
+}

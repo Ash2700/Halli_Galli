@@ -5,7 +5,6 @@ class Game {
     this.deck = [] // 牌推
     this.currentPlayerIndex = 0 // 目前進行玩家的索引
     this.isActive = false // 遊戲是否進行
-    this.readyToStart = new Map()
     this.tableCards = [],
     this.lastFlippedCards = []
   }
@@ -43,21 +42,7 @@ class Game {
       [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]]
     }
   }
-  //追蹤玩家是否要馬上遊戲
-  setPlayerReady(playerId, isReady) {
-    if (this.readyToStart.has(playerId)) {
-      this.readyToStart.set(playerId, isReady)
-      this.checkIfReadyToStart()
-    }
-  }
-  // 追蹤開始條件
-  checkIfReadyToStart() {
-    const playerCount = this.players.length
-    const AllAgreed = Array.from(this.readyToStart.values()).every(v => v === true)
-    if (playerCount === 6 || (playerCount < 5 && AllAgreed)) {
-      this.startGame()
-    }
-  }
+  
   // 開始
   startGame() {
     if (this.players.length >= 2) {
@@ -167,8 +152,9 @@ class Game {
   }
 }
 class Player {
-  constructor(id) {
+  constructor(id,name) {
     this.id = id
+    this.name= name
     this.cards = [] // 玩家牌堆的牌
     this.tableCardsCount = 0
   }

@@ -1,6 +1,6 @@
 const socketIo = require('socket.io')
 const roomManager = require('./roomManager');
-const { Player } = require('../games');
+const { Player, Game } = require('../games/index');
 
 let io = null;
 
@@ -12,27 +12,33 @@ exports.init = (server) => {
     socket.on('disconnected', ()=>{
       console.log('Client disconnected')
     })
-
     socket.on('message', (msg) =>{
       console.log('Message from client', msg)
       socket.emit('message', 'Hello from Server')
     })
     socket.on('createRoom', ({name, hostId})=> {
-      console.log(name)
       const room = roomManager.createRoom(name,hostId)
       if(room) {
         io.emit('updateRooms',roomManager.getRooms())
+        socket.join(room.id)
+        socket.emit('joinRoomResponse',{success: true,roomId:room.id})
       }
     })
-    socket.on('updateRooms', () => {
-      const rooms = roomManager.rooms
-      socket.emit('updateRooms',{rooms})
-    })
-    socket.on('joinRoom', ({roomId, plyerId})=> {
-      const  room = roomManager.joinRoom(roomId, plyerId)
+    socket.on('callRooms',() =>[
+      io.emit('updateRooms',roomManager.getRooms())
+    ])
+    socket.on('joinRoom', ({roomId, playerId})=> {
+      const  room = roomManager.joinRoom(roomId, playerId)
       if(room){
-        io.to(room.id).emit('roomJoined', {room})
+        io.emit('updateRooms', roomManager.getRooms())
+        socket.join(roomId)
+        socket.emit('joinRoomResponse', {success: true, roomId})
+      }else {
+        socket.emit('joinRoomResponse', { success: false, message: 'Room does not exist or is full'})
       }
+    })
+    socket.on('playerReady',({playerId,roomId})=>{
+      roomManager.setPlayerReady(roomId, playerId, true)
     })
   })
 
