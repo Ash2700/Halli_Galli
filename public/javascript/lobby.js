@@ -18,8 +18,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const socket = io('http://localhost:3000');
 
   // socket 建立
-  socket.on('connect', () => {
-    console.log('Connected to server');
+  socket.emit('lobby', () => {
+    console.log('Connected to lobby');
   });
   
   socket.on('message', (data) => {
@@ -28,25 +28,28 @@ document.addEventListener('DOMContentLoaded', function () {
   socket.emit('callRooms',() => {
     console.log('give Rooms')
   })
-  // 送加入房間
+  // 加入房間
   document.getElementById('joinRoom').addEventListener('click', () => {
     const roomId = selectedRoomId;
-    socket.emit('joinRoom', { roomId, playerId });
+    socket.emit('joinRoom', { roomId, playerId, playerName });
   });
   
+  // 進入遊戲房間
   socket.on('joinRoomResponse',(response)=>{
     if(response.success){
       window.location.href = `/gameRoom.html?roomId=${response.roomId}`
-    }
+    }else console.log(response.message)
   })
   
+  // 建立房間
   const createRoomButton = document.getElementById('createRoom');
   const newRoomNameInput = document.getElementById('newRoomName');
   createRoomButton.addEventListener('click', () => {
     const name = newRoomNameInput.value;
-    socket.emit('createRoom', { name, hostId:playerId });
+    socket.emit('createRoom', { name, hostId:playerId, playerName });
   });
   
+  // 更新大廳資訊
   const roomsContainer = document.getElementById('rooms');
   let selectedRoomId = null;
   socket.on('updateRooms', (rooms) => {
@@ -65,6 +68,8 @@ document.addEventListener('DOMContentLoaded', function () {
       roomsContainer.appendChild(roomDiv);
     });
   });
+
+  
   const leaveLobbyButton = document.getElementById('leaveLobby');
   leaveLobbyButton.addEventListener('click', () => {
     window.location.href = '/'; // 或其他適合的行為

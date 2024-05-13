@@ -1,23 +1,106 @@
-/* styles.css */
+/* gameRoom.css */
 body {
   font-family: Arial, sans-serif;
+  display: grid;
+  grid-template-columns: auto 300px; /* 主区域和侧边栏宽度 */
+  grid-template-areas: 
+      "header header"
+      "game-area sidebar"
+      "footer footer";
+  height: 100vh;
+  margin: 0;
+  background: #f0f0f0;
+}
+
+header {
+  grid-area: header;
+  background: #333;
+  color: white;
+  padding: 10px 20px;
+  width: 100%;
+  box-sizing: border-box;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+}
+
+#game-area {
+  grid-area: game-area;
+  background: white;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(6, 1fr); /* 6列布局 */
+  grid-gap: 10px;
   align-items: center;
   justify-content: center;
 }
 
-header, footer {
-  margin: 10px;
-}
-
-#game-area {
-  padding: 20px;
-  border: 1px solid #ccc;
-  margin: 10px;
+div#game-space>div.row{
+  height: 30 vh ;
 }
 
 aside {
+  grid-area: sidebar;
+  background: #fff;
+  padding: 20px;
   display: flex;
   flex-direction: column;
 }
+
+button {
+  margin-top: 10px;
+  padding: 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0056b3;
+}
+
+button:disabled {
+  background: #ccc;
+}
+
+footer {
+  grid-area: footer;
+  width: 100%;
+  text-align: center;
+  padding: 10px 0;
+  background: #333;
+  color: white;
+}
+
+/* .card, .flipdeck {
+  width: 100%;
+  padding-top: 100%;  
+  background: grey;
+  position: relative;
+} */
+
+/* .bell {
+  grid-column: 3 / span 2;
+  place-self: center;
+  background: url('/images/bell.png') no-repeat center;
+  background-size: contain;
+  width: 50px;
+  height: 50px;
+} */
+.flipped-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.img-fluid {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 768px) {
+  .flipped-card {
+      padding: 10px;
+  }
+}
+

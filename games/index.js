@@ -3,16 +3,15 @@ class Game {
     this.id = id // 遊戲id
     this.players = [] // 存玩家訊息
     this.deck = [] // 牌推
-    this.currentPlayerIndex = 0 // 目前進行玩家的索引
+    this.currentPlayerIndex = -1 // 目前進行玩家的索引
     this.isActive = false // 遊戲是否進行
     this.tableCards = [],
-    this.lastFlippedCards = []
+      this.lastFlippedCards = []
   }
   // 加入玩家
   addPlayer(player) {
     if (this.players.length < 6) {
       this.players.push(player)
-      this.readyToStart.set(player.id, false)
       return true
     }
     return false
@@ -42,17 +41,6 @@ class Game {
       [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]]
     }
   }
-  
-  // 開始
-  startGame() {
-    if (this.players.length >= 2) {
-      this.isActive = true,
-        this.dealCards(this.players.length)
-      console.log(`Game Start, 共有${this.players.length}名玩家參與`)
-    } else {
-      console.log('不足最少玩家數,遊戲無法開始')
-    }
-  }
   // 發牌
   dealCards(playerCount) {
     const cardDistribution = { 2: 28, 3: 18, 4: 14, 5: 11, 6: 9 }
@@ -69,6 +57,19 @@ class Game {
         }
       }
     })
+  }
+  // 開始
+  startGame() {
+    if (this.players.length >= 2) {
+      this.isActive = true,
+      console.log(`Game Start, 共有${this.players.length}名玩家參與`)
+      this.initializeDeck()
+      this.shuffleDeck()
+      this.dealCards(this.players.length)
+      this.nextPlayer()
+    } else {
+      console.log('不足最少玩家數,遊戲無法開始')
+    }
   }
   // 玩家翻牌
   playCard(playerId) {
@@ -93,6 +94,9 @@ class Game {
     })
 
     return Object.values(fruitCounts).some(count => count === 5)
+  }
+  nextPlayer() {
+    this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length
   }
   // 按鈴
   ringTheBell(playerId) {
@@ -147,14 +151,12 @@ class Game {
       console.log("遊戲意外結束，未達到正常的結束條件。");
     }
   }
-  nextPlayer() {
-    this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length
-  }
+
 }
 class Player {
-  constructor(id,name) {
+  constructor(id, name) {
     this.id = id
-    this.name= name
+    this.name = name
     this.cards = [] // 玩家牌堆的牌
     this.tableCardsCount = 0
   }
