@@ -20,7 +20,9 @@ exports.init = (server) => {
       const room = roomManager.createRoom(name,hostId,playerName)
       if(room) {
         io.emit('updateRooms',roomManager.getRooms())
-        socket.join(room.id)
+
+        io.socketsJoin(room.id)
+
         socket.emit('joinRoomResponse',{success: true,roomId:room.id})
       }
     })
@@ -30,11 +32,6 @@ exports.init = (server) => {
     socket.on('lobby',()=>{
       io.emit('updateRooms', roomManager.getRooms())
     })
-    socket.on('test',(roomId) => {
-      console.log(typeof(roomId), roomId)
-      socket.join(Number(roomId))
-      socket.to(roomId).emit('backtest')
-    })
     
     // 加入
     socket.on('joinRoom', ({roomId, playerId,playerName})=> {
@@ -43,28 +40,47 @@ exports.init = (server) => {
         roomManager.checkIfReadyToStart(room.id)
         io.emit('updateRoom', roomManager.getRooms())
         socket.join(room.id)
-        socket.to(room.id).emit('updateTheRoom',roomManager.getTheRoom(roomId))
+        io.to(room.id).emit('updateTheRoom',roomManager.getTheRoom(roomId))
         socket.emit('joinRoomResponse', {success: true, roomId})
       }else {
         socket.emit('joinRoomResponse', { success: false, message: 'Room does not exist or is full'})
       }
     })
+
+    // 以下遊戲房間
+
     socket.on('playerReady',({playerId,roomId})=>{
+      const rId = Number(roomId) 
       // 設定
       roomManager.setPlayerReady(roomId, playerId, true)
       // 更新房間
-      socket.to(Number(roomId)).emit('updateTheRoom', roomManager.getTheRoom(roomId))
+      socket.join(rId)
+      socket.to(rId).emit('updateTheRoom', roomManager.getTheRoom(roomId))
       //檢查
       if(roomManager.checkIfReadyToStart(roomId)){
-        const game = roomManager.games.get(Number(roomId))
-        console.log(`${roomId} is starting game`)
-        socket.to(Number(roomId)).emit('startGame')
+        console.log(`room ${roomId}: is starting game`)
+        // 更新 gameview
+        updateGameView(roomId)
       }
     })
+    function updateGameView(roomId){
+      console.log(socket.rooms)
+      const rId = Number(roomId)
+      const data  = roomManager.games.get(rId)
+      const lastFlippedCards = data.lastFlippedCards
+      const players = data.players
+      io.to(rId).emit('updateTheGame',players,lastFlippedCards)
+    }
 
-    socket.on('dosomething',roomId=>{
-      const length =6
-      socket.to(Number(roomId)).emit('updateTheGame',length,[{fruit:'banana',num:1},{fruit:'banana',num:1},{fruit:'banana',num:1},{fruit:'banana',num:1},{fruit:'banana',num:1},{fruit:'banana',num:1}])
+    socket.on('flipCard',(roomId, playerId) => {
+      const rId = Number(roomId)
+      const  game = roomManager.games.get(rId)
+      game.playCard(playerId)
+      updateGameView(roomId)
+    })
+
+    socket.on('updateGameView',roomId=>{
+        updateGameView(roomId)
     })
   })
 

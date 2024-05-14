@@ -6,7 +6,7 @@ class Game {
     this.currentPlayerIndex = -1 // 目前進行玩家的索引
     this.isActive = false // 遊戲是否進行
     this.tableCards = [],
-      this.lastFlippedCards = []
+    this.lastFlippedCards = []
   }
   // 加入玩家
   addPlayer(player) {
@@ -74,16 +74,30 @@ class Game {
   // 玩家翻牌
   playCard(playerId) {
     const player = this.players.find(p => p.id === playerId)
-    if (!player || player.cards.length === 0) {
+    if (!player || player.cards.length === 0 || player.isFlipped ) {
       return
     }
     const flippedCard = player.cards.shift()
     this.tableCards.push(flippedCard)
     player.tableCardsCount++
     this.lastFlippedCards[this.currentPlayerIndex] = flippedCard
+    player.isFlipped = true
     this.updateTotal()
     this.nextPlayer()
   }
+
+  checkPlayerCardDeck(playerId){
+    this.players = this.players.filter(player => {
+      if (player.cards.length > 0 || player.tableCardsCount > 0) {
+        return true // 手上 和 桌上還有牌
+      } else {
+        console.log(`玩家 ${player.id} 出局`)
+        return false
+      }
+    })
+  }
+
+
   // 更新加總
   updateTotal() {
     const fruitCounts = {}
@@ -97,7 +111,15 @@ class Game {
   }
   nextPlayer() {
     this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length
-  }
+    const player = this.players[this.currentPlayerIndex]
+    if(player.cards.length === 0 && player.tableCardsCount ===0){
+        const playerOut = this.gameOut(this.currentPlayerIndex)
+        console.log(`玩家${playerOut.name}出局`)
+        this.checkGameCondition()
+        this.nextPlayer()
+      }
+     player.isFlipped = false
+    }
   // 按鈴
   ringTheBell(playerId) {
     const resetCount = 0
@@ -112,6 +134,7 @@ class Game {
       // 清空玩家翻排的紀錄
       this.players.forEach(p => { p.tableCardsCount = resetCount })
       console.log(`玩家 ${playerId} 正確按鈴，收走了所有桌面上的牌。`);
+      this.checkPlayerCardDeck()
     } else {
       // 錯誤按鈴，給其他每個玩家一張牌作為懲罰
       const mistakePlayer = this.players.find(p => p.id === playerId)
@@ -124,8 +147,13 @@ class Game {
     }
   }
   // 出局
-  checkForElimination() {
-    this.players = this.players.filter(player => {
+  gameOut(){
+    const whoOut =this.players.splice(position,1)
+    return whoOut
+  }
+
+  checkPlayersDecks(){
+    this.players = this.players.filter((player) => {
       if (player.cards.length > 0 || player.tableCardsCount > 0) {
         return true // 手上 和 桌上還有牌
       } else {
@@ -133,19 +161,24 @@ class Game {
         return false
       }
     })
-    if (this.players.length === 2) {
-      this.endGame()
-    }
   }
-  // 遊戲結束
-  endGame() {
-    this.isActive = false
-    if (this.players.length === 2) {
+
+  checkGameCondition() {
+    if (this.players.length === 2 ) {
       const [player1, player2] = this.players
       const totalCardsPlayer1 = player1.cards.length;
       const totalCardsPlayer2 = player2.cards.length;
-
-      const winner = totalCardsPlayer1 > totalCardsPlayer2 ? player1 : player2;
+      if (totalCardsPlayer1 !== totalCardsPlayer2){
+        const winner = totalCardsPlayer1 > totalCardsPlayer2 ? player1 : player2
+        this.endGame(winner)
+      }
+      return 
+    }
+  }
+  // 遊戲結束
+  endGame(winner) {
+    this.isActive = false
+    if(winner){
       console.log(`遊戲結束。勝者是玩家 ${winner.id}，持有更多的牌。`);
     } else {
       console.log("遊戲意外結束，未達到正常的結束條件。");
@@ -159,6 +192,7 @@ class Player {
     this.name = name
     this.cards = [] // 玩家牌堆的牌
     this.tableCardsCount = 0
+    this.isFlipped = false
   }
 }
 

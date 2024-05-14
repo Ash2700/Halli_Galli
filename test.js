@@ -34,6 +34,7 @@ const data = roomManager.games.get(1)
 // console.log(data)
 // const trans = JSON.stringify(data)
 // console.log(trans)
-const mapTo = data.players.length
+const mapTo = data.
 
 console.log(mapTo)
+

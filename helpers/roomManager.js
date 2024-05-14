@@ -81,6 +81,13 @@ class RoomManager {
     this.games.set(room.id, newGame)
     newGame.startGame()
   }
+
+  
+
+  getTheGame(roomId){
+    const rId = Number(roomId)
+    const game = this.games.get(rId)
+  }
 }
 const roomManager = new RoomManager()
 module.exports = roomManager
