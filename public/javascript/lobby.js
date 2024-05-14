@@ -15,7 +15,7 @@ function getCookie(name) {
 
 document.addEventListener('DOMContentLoaded', function () {
   
-  const socket = io('http://localhost:3000');
+  const socket = io();
 
   // socket 建立
   socket.emit('lobby', () => {
@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  
+  //離開
   const leaveLobbyButton = document.getElementById('leaveLobby');
   leaveLobbyButton.addEventListener('click', () => {
     window.location.href = '/'; // 或其他適合的行為

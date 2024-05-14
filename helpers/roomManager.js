@@ -56,19 +56,20 @@ class RoomManager {
     const player = this.getTheRoom(roomId).players.find(player => player.id === playerId)
     player.readyToStart = !(player.readyToStart)
     // console.log(player.readyToStart)
-    this.checkIfReadyToStart(roomId)
   }
   // 追蹤開始條件
   checkIfReadyToStart(roomId) {
     const room=this.getTheRoom(roomId)
     const playerCount = room.players.length
     const AllAgreed = room.players.every(v => v.readyToStart === true)
+    const game = this.games.has(room.id)
     // console.log(AllAgreed)
+    if(game) true
     if (playerCount === 6 || (playerCount > 1 && playerCount < 6 && AllAgreed)) {
       this.startGameProcess(roomId)
       return true
     }
-    return false
+    return false    
   }
 
   startGameProcess(roomId) {
@@ -82,11 +83,10 @@ class RoomManager {
     newGame.startGame()
   }
 
-  
-
   getTheGame(roomId){
     const rId = Number(roomId)
     const game = this.games.get(rId)
+    return game
   }
 }
 const roomManager = new RoomManager()

@@ -75,7 +75,7 @@ function updateFlipArea(cards) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const socket = io('http://localhost:3000')
+  const socket = io()
   socket.on('connect', () => {
     console.log(`connected room:${roomId},${socket.connected}`)
   })
@@ -93,21 +93,11 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('here')
   }))
 
-
-
-
-
-
   const gameArea = document.getElementById('game-space')
-  // test
-  // gameArea.addEventListener('click', () => {
-  //   socket.emit('updateGameView', roomId)
-  // })
-
   socket.on('updateTheGame', (players, cards) => {
     const cardDeck = updateCardArea(players)
     const flipped = updateFlipArea(cards)
-    gameArea.innerHTML = `<div class ="row align-items-center"><div class="card-deck col text-center border  ">
+    gameArea.innerHTML = `<div class="card-deck col text-center border  ">
     <div class="row row-cols-1 ">
       ${cardDeck[0]}
     </div>
@@ -118,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ${flipped[0]}
     </div>
 </div>
-<div class="bell-area col text-center border align-self-center">
+<div class="bell-area  col text-center border align-self-center" id="bell">
     <div>
         <img src="/img/bell.png" class="img-thumbnail" alt="bell" id="bell">
     </div>
@@ -133,12 +123,18 @@ ${flipped[1]}
 ${cardDeck[1]}
 </div>
 </div>
-</div>`
+`
     // 在更新innerHTML後綁定事件處理器
     const flipDeck = document.getElementById(`${playerId}`)
 
     flipDeck.addEventListener('click', () => {
       socket.emit('flipCard', roomId, playerId)
+    })
+
+    //再更新後綁定
+    const bell = document.getElementById('bell')
+    bell.addEventListener('click',() => {
+      socket.emit('ringTheBell', roomId, playerId)
     })
   })
 

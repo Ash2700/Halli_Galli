@@ -6,7 +6,7 @@ class Game {
     this.currentPlayerIndex = -1 // 目前進行玩家的索引
     this.isActive = false // 遊戲是否進行
     this.tableCards = [],
-    this.lastFlippedCards = []
+      this.lastFlippedCards = []
   }
   // 加入玩家
   addPlayer(player) {
@@ -62,7 +62,7 @@ class Game {
   startGame() {
     if (this.players.length >= 2) {
       this.isActive = true,
-      console.log(`Game Start, 共有${this.players.length}名玩家參與`)
+        console.log(`Game Start, 共有${this.players.length}名玩家參與`)
       this.initializeDeck()
       this.shuffleDeck()
       this.dealCards(this.players.length)
@@ -74,7 +74,7 @@ class Game {
   // 玩家翻牌
   playCard(playerId) {
     const player = this.players.find(p => p.id === playerId)
-    if (!player || player.cards.length === 0 || player.isFlipped ) {
+    if (!player || player.cards.length === 0 || player.isFlipped) {
       return
     }
     const flippedCard = player.cards.shift()
@@ -86,7 +86,7 @@ class Game {
     this.nextPlayer()
   }
 
-  checkPlayerCardDeck(playerId){
+  checkPlayerCardDeck(playerId) {
     this.players = this.players.filter(player => {
       if (player.cards.length > 0 || player.tableCardsCount > 0) {
         return true // 手上 和 桌上還有牌
@@ -109,22 +109,24 @@ class Game {
 
     return Object.values(fruitCounts).some(count => count === 5)
   }
+
   nextPlayer() {
     this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length
     const player = this.players[this.currentPlayerIndex]
-    if(player.cards.length === 0 && player.tableCardsCount ===0){
-        const playerOut = this.gameOut(this.currentPlayerIndex)
-        console.log(`玩家${playerOut.name}出局`)
-        this.checkGameCondition()
-        this.nextPlayer()
-      }
-     player.isFlipped = false
+    if (player.cards.length === 0 && player.tableCardsCount === 0) {
+      const playerOut = this.gameOut(this.currentPlayerIndex)
+      console.log(`玩家${playerOut.name}出局`)
+      this.checkGameCondition()
+      this.nextPlayer()
     }
+    player.isFlipped = false
+  }
+
   // 按鈴
   ringTheBell(playerId) {
     const resetCount = 0
-    const isCorrect = this.updateTotal(); // 更新並檢查是否達到5
-    if (isCorrect) {
+    const isEqualFive = this.updateTotal(); // 更新並檢查是否達到5
+    if (isEqualFive) {
       // 正確按鈴，收集桌面上的牌
       this.players.find(p => p.id === playerId).cards.push(...this.tableCards);
       // 清空桌面的牌
@@ -140,19 +142,19 @@ class Game {
       const mistakePlayer = this.players.find(p => p.id === playerId)
       this.players.forEach(p => {
         if (p.id !== playerId && mistakePlayer.cards.length > 0) {
-          p.cards.push(mistakePlayer.Cards.pop());
+          p.cards.push(mistakePlayer.cards.pop());
         }
       });
       console.log(`玩家 ${playerId} 按錯了鈴，向每位玩家發了一張牌作為懲罰。`);
     }
   }
   // 出局
-  gameOut(){
-    const whoOut =this.players.splice(position,1)
+  gameOut() {
+    const whoOut = this.players.splice(position, 1)
     return whoOut
   }
 
-  checkPlayersDecks(){
+  checkPlayersDecks() {
     this.players = this.players.filter((player) => {
       if (player.cards.length > 0 || player.tableCardsCount > 0) {
         return true // 手上 和 桌上還有牌
@@ -164,21 +166,21 @@ class Game {
   }
 
   checkGameCondition() {
-    if (this.players.length === 2 ) {
+    if (this.players.length === 2) {
       const [player1, player2] = this.players
       const totalCardsPlayer1 = player1.cards.length;
       const totalCardsPlayer2 = player2.cards.length;
-      if (totalCardsPlayer1 !== totalCardsPlayer2){
+      if (totalCardsPlayer1 !== totalCardsPlayer2) {
         const winner = totalCardsPlayer1 > totalCardsPlayer2 ? player1 : player2
         this.endGame(winner)
       }
-      return 
+      return
     }
   }
   // 遊戲結束
   endGame(winner) {
     this.isActive = false
-    if(winner){
+    if (winner) {
       console.log(`遊戲結束。勝者是玩家 ${winner.id}，持有更多的牌。`);
     } else {
       console.log("遊戲意外結束，未達到正常的結束條件。");
