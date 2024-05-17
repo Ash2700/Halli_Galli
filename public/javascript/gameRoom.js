@@ -11,11 +11,19 @@ function getCookie(name) {
   const parts = value.split(`; ${name}=`);
   if (parts.length === 2) return parts.pop().split(';').shift();
 }
-function updateCardArea(players) {
+function updateCardArea(players, playerIndex) {
   let deckLeft = ''
   let deckRight = ''
   players.forEach((player, index) => {
-    const element = `<div class="col" id=${player.id} style="max-height: 33%;"><img src="/img/cropped_card_design.png" class="img-thumbnail" alt="card-back"></div>`
+    const addWord = (index === Number(playerIndex)) ? 'selected' : ''
+    const element =
+      `<div class="col card-deck ${addWord} position-relative" id=${player.id} style="max-height: 33%;">
+      <img src="/img/cropped_card_design.png" class="img-thumbnail" alt="card-back">
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+    ${player.cards.length}
+        <span class="visually-hidden">unread messages
+        </span>
+    </div>`
     switch (index) {
       case 0:
         deckLeft += element
@@ -77,7 +85,8 @@ function updateFlipArea(cards) {
 document.addEventListener('DOMContentLoaded', () => {
   const socket = io()
   socket.on('connect', () => {
-    console.log(`connected room:${roomId},${socket.connected}`)
+    console.log('connect', socket.id)
+    if (roomId) socket.emit('updateTheRoom', roomId, playerId)
   })
 
   socket.on('disconnect', () => {
@@ -94,8 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }))
 
   const gameArea = document.getElementById('game-space')
-  socket.on('updateTheGame', (players, cards) => {
-    const cardDeck = updateCardArea(players)
+  socket.on('updateTheGame', (players, cards, index) => {
+    const cardDeck = updateCardArea(players, index)
     const flipped = updateFlipArea(cards)
     gameArea.innerHTML = `<div class="card-deck col text-center border  ">
     <div class="row row-cols-1 ">
@@ -133,9 +142,47 @@ ${cardDeck[1]}
 
     //再更新後綁定
     const bell = document.getElementById('bell')
-    bell.addEventListener('click',() => {
+    bell.addEventListener('click', () => {
       socket.emit('ringTheBell', roomId, playerId)
     })
   })
 
+  const playerList = document.getElementById('players-list')
+
+  function renderPlayerList(players) {
+    let content = ''
+    players.forEach(player => {
+      content += `<ul class="list-group list-group-horizontal">
+            <li class="list-group-item w-75 fs-6"> ${player.name} </li>
+            <li class="list-group-item w-25 fs-6">${player.readyToStart}<li>
+            </ul>`
+    })
+    let fixWord = `<ul class="list-group list-group-horizontal">
+          <li class="list-group-item w-75 fs-6"> Name</li>
+          <li class="list-group-item w-25 fs-6"> Status</li></ul>${content}`
+
+    return fixWord
+  }
+  // 更新房間的玩家清單
+  socket.on('renderPlayerList', players => {
+    if (!players) return
+    const content = renderPlayerList(players)
+    playerList.innerHTML = content
+  })
+
+  function renderMessage(messages) {
+    if (!messages) return
+    let result = ''
+    messages.forEach(msg => {
+      const element = `<p class = "fs-6">gameInfo: <span>${msg}</span></p>`
+      result += element
+    })
+    return result
+  }
+
+  const message = document.getElementById('game-message')
+  socket.on('renderMessage', messages => {
+    const renderContent = renderMessage(messages)
+    message.innerHTML = renderContent
+  })
 })

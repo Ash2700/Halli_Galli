@@ -16,22 +16,16 @@ exports.init = (server) => {
       socket.emit('message', 'Hello from Server')
     })
     // 建立新房間和加入
+    socket.on('lobby', () => {
+      io.emit('updateRooms', roomManager.getRooms())
+    })
     socket.on('createRoom', ({ name, hostId, playerName }) => {
       const room = roomManager.createRoom(name, hostId, playerName)
       if (room) {
         io.emit('updateRooms', roomManager.getRooms())
-
-        io.socketsJoin(room.id)
-
         socket.emit('joinRoomResponse', { success: true, roomId: room.id })
+        socket.join(room.id)
       }
-    })
-
-    socket.on('leaveRoom', ({ roomId, playerId }) => {
-    })
-
-    socket.on('lobby', () => {
-      io.emit('updateRooms', roomManager.getRooms())
     })
 
     // 加入
@@ -39,45 +33,45 @@ exports.init = (server) => {
       const room = roomManager.joinRoom(roomId, playerId, playerName)
       if (room) {
         roomManager.checkIfReadyToStart(room.id)
-        io.emit('updateRoom', roomManager.getRooms())
-        socket.join(room.id)
-        io.to(room.id).emit('updateTheRoom', roomManager.getTheRoom(roomId))
+        io.emit('updateRooms', roomManager.getRooms())
         socket.emit('joinRoomResponse', { success: true, roomId })
+        socket.join(room.id)
+        io.to(room.id).emit('renderPlayerList', roomManager.getTheRoom(roomId))
       } else {
         socket.emit('joinRoomResponse', { success: false, message: 'Room does not exist or is full' })
       }
     })
-
+    socket.on('leaveRoom', ({ roomId, playerId }) => {
+    })
     // 以下遊戲房間
-
     socket.on('playerReady', ({ playerId, roomId }) => {
+      if (!roomId) return
       const rId = Number(roomId)
+      const game = getGameObj(roomId)
+      const room = roomManager.getTheRoom(roomId)
       // 設定
-      roomManager.setPlayerReady(roomId, playerId, true)
+      if (!game) roomManager.setPlayerReady(roomId, playerId, true)
       // 更新房間
       socket.join(rId)
-      io.to(rId).emit('updateTheRoom', roomManager.getTheRoom(roomId))
+      if (room) renderPlayerList(room)
       //檢查
+      if (game) io.to(Number(roomId)).emit('renderMessage', game.getMessages())
       if (roomManager.checkIfReadyToStart(roomId)) {
-        console.log(`room ${roomId}: is starting game`)
         // 更新 gameview
         updateGameView(roomId)
       }
     })
-
-    function getGameObj (roomId){
-      const rId = Number(roomId)
-      const data = roomManager.games.get(rId)
-      return data
-    }
-
-    function updateGameView(roomId) {
-      const data = getGameObj(roomId)
-      const lastFlippedCards = data.lastFlippedCards
-      const players = data.players
-      io.to(Number(roomId)).emit('updateTheGame', players, lastFlippedCards)
-    }
-
+    //重新連線後更新畫面
+    socket.on('updateTheRoom', (roomId, playerId) => {
+      const room = roomManager.getTheRoom(roomId)
+      if (room) renderPlayerList(room)
+      const game = getGameObj(roomId)
+      if (game) {
+        updateGameView(roomId)
+        renderGameMessage(roomId)
+      }
+      
+    })
     socket.on('updateGameView', roomId => {
       updateGameView(roomId)
     })
@@ -86,11 +80,39 @@ exports.init = (server) => {
       game.playCard(playerId)
       updateGameView(roomId)
     })
-    socket.on('ringTheBell',(roomId, playerId) => {
+    socket.on('ringTheBell', (roomId, playerId) => {
       const game = getGameObj(roomId)
       game.ringTheBell(playerId)
+      socket.join(Number(roomId))
+      const messages = game.getMessages()
+      io.to(Number(roomId)).emit('renderMessage', messages)
       updateGameView(roomId)
     })
+
+    function getGameObj(roomId) {
+      const rId = Number(roomId)
+      const data = roomManager.games.get(rId)
+      return data
+    }
+    function renderPlayerList(room) {
+      socket.join(room.id)
+      io.to(room.id).emit('renderPlayerList', room.players)
+    }
+    function updateGameView(roomId) {
+      const data = getGameObj(roomId)
+      if(!data) return 
+      const lastFlippedCards = data.lastFlippedCards
+      const players = data.players
+      const currentPlayersIndex = data.currentPlayerIndex
+      io.to(Number(roomId)).emit('updateTheGame', players, lastFlippedCards, currentPlayersIndex)
+    }
+    function renderGameMessage(roomId){
+      const game =getGameObj(roomId)
+      if(!game) return 
+      socket.join(Number(roomId))
+      const messages = game.getMessages()
+      io.to(Number(roomId)).emit('renderMessage', messages)
+    }
   })
 
   exports.getIO = () => {

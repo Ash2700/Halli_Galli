@@ -1,34 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="100%">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Game Lobby</title>
     <link rel="stylesheet" href="/css/styles.css">
     <script src="/socket.io/socket.io.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 </head>
-<body>
-    <header >
-        <p>
-        id: 
-            <span id="show-id"></span>,
-        name: 
-            <span id="show-name"></span>
-        </p>
 
+<body>
+    <header class="h-25 justify-content-between">
+        <div>
+            <p>id:
+                <span id="show-id"></span>
+            </p>
+        </div>
+        <div>
+            <p>name:
+                <span id="show-name"></span>
+            </p>
+        </div>
     </header>
-    <div id="lobby">
-        <div id="rooms">
+    <div class="container-fluid bg-light  align-items-center " id="lobby">
+        <div class="row">
+            <div class=" col-10 border h-75" id="rooms">
             <!-- 房間列表會在這裡動態生成 -->
         </div>
-        <div id="controls">
+        <div class="col-2" id="controls">
             <input type="text" id="newRoomName" placeholder="Enter room name">
             <button id="createRoom">Create Room</button>
             <button id="joinRoom">Join Room</button>
             <button id="leaveLobby">Leave Lobby</button>
         </div>
+        </div>
+        
     </div>
 
     <script src="/javascript/lobby.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+        crossorigin="anonymous"></script>
 </body>
+
 </html>

@@ -1,3 +1,4 @@
+const MessageManager = require('../helpers/messageManager')
 class Game {
   constructor(id) {
     this.id = id // 遊戲id
@@ -7,6 +8,7 @@ class Game {
     this.isActive = false // 遊戲是否進行
     this.tableCards = [],
       this.lastFlippedCards = []
+      this.messages = new MessageManager()
   }
   // 加入玩家
   addPlayer(player) {
@@ -62,17 +64,21 @@ class Game {
   startGame() {
     if (this.players.length >= 2) {
       this.isActive = true,
-        console.log(`Game Start, 共有${this.players.length}名玩家參與`)
+        this.messages.addMessage(`Game Start, 共有${this.players.length}名玩家參與`)
       this.initializeDeck()
       this.shuffleDeck()
       this.dealCards(this.players.length)
       this.nextPlayer()
     } else {
-      console.log('不足最少玩家數,遊戲無法開始')
+      this.messages.addMessage('不足最少玩家數,遊戲無法開始')
     }
   }
   // 玩家翻牌
   playCard(playerId) {
+    if(!this.isActive) {
+      this.messages.addMessage(`遊戲已結束`)
+      return
+    }
     const player = this.players.find(p => p.id === playerId)
     if (!player || player.cards.length === 0 || player.isFlipped) {
       return
@@ -85,19 +91,16 @@ class Game {
     this.updateTotal()
     this.nextPlayer()
   }
-
   checkPlayerCardDeck(playerId) {
     this.players = this.players.filter(player => {
       if (player.cards.length > 0 || player.tableCardsCount > 0) {
         return true // 手上 和 桌上還有牌
       } else {
-        console.log(`玩家 ${player.id} 出局`)
+        this.messages.addMessage(`玩家 ${player.id} 出局`)
         return false
       }
     })
   }
-
-
   // 更新加總
   updateTotal() {
     const fruitCounts = {}
@@ -124,19 +127,25 @@ class Game {
 
   // 按鈴
   ringTheBell(playerId) {
+    if(!this.isActive) {
+      this.messages.addMessage(`遊戲已結束`)
+      return
+    }
     const resetCount = 0
     const isEqualFive = this.updateTotal(); // 更新並檢查是否達到5
     if (isEqualFive) {
       // 正確按鈴，收集桌面上的牌
-      this.players.find(p => p.id === playerId).cards.push(...this.tableCards);
+      const player = this.players.find(p => p.id === playerId)
+      player.cards.push(...this.tableCards);
       // 清空桌面的牌
       this.tableCards = []
       // 清空玩家面前的牌
       this.lastFlippedCards = [];
       // 清空玩家翻排的紀錄
       this.players.forEach(p => { p.tableCardsCount = resetCount })
-      console.log(`玩家 ${playerId} 正確按鈴，收走了所有桌面上的牌。`);
+      this.messages.addMessage(`玩家 ${player.name} 正確按鈴，收走了所有桌面上的牌。`)
       this.checkPlayerCardDeck()
+      this.checkGameCondition()
     } else {
       // 錯誤按鈴，給其他每個玩家一張牌作為懲罰
       const mistakePlayer = this.players.find(p => p.id === playerId)
@@ -145,7 +154,7 @@ class Game {
           p.cards.push(mistakePlayer.cards.pop());
         }
       });
-      console.log(`玩家 ${playerId} 按錯了鈴，向每位玩家發了一張牌作為懲罰。`);
+      this.messages.addMessage(`玩家 ${playerId} 按錯了鈴，向每位玩家發了一張牌作為懲罰。`)
     }
   }
   // 出局
@@ -159,7 +168,7 @@ class Game {
       if (player.cards.length > 0 || player.tableCardsCount > 0) {
         return true // 手上 和 桌上還有牌
       } else {
-        console.log(`玩家 ${player.id} 出局`)
+        this.messages.addMessage(`玩家 ${player.id} 出局`)
         return false
       }
     })
@@ -177,13 +186,17 @@ class Game {
       return
     }
   }
+  getMessages(){
+    const messages = this.messages.messages
+    return messages
+  }
   // 遊戲結束
   endGame(winner) {
     this.isActive = false
     if (winner) {
-      console.log(`遊戲結束。勝者是玩家 ${winner.id}，持有更多的牌。`);
+      this.messages.addMessage(`遊戲結束。勝者是玩家 ${winner.id}，持有更多的牌。`)
     } else {
-      console.log("遊戲意外結束，未達到正常的結束條件。");
+      this.messages.addMessage("遊戲意外結束，未達到正常的結束條件。")
     }
   }
 
@@ -197,5 +210,6 @@ class Player {
     this.isFlipped = false
   }
 }
-
 module.exports = { Game, Player }
+
+

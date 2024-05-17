@@ -12,24 +12,32 @@
 </head>
 
 <body>
-    <header class="h-50">
-        <p>ID: <span id="show-id"></span> Name: <span id="show-name"></span></p>
-        <p></p>
-        <p>Room: <span id = 'show-roomId'></span></p>
+    <header class="">
+        <div>ID: <span id="show-id"></span></div>
+        <div>Name: <span id="show-name"></span></div>
+        <div>Room: <span id='show-roomId'></span></div>
     </header>
-    <div class="container border " >
-        <div class="row align-items-center" id="game-space">
-            <p>start game condition<br>1.player count  = 6<br>2.paler >2 && all ready to play game</p>
+
+    <div class="container-fluid bg-light  align-items-center h-75">
+        <div class="row h-100 w-100">
+            <div class="col-8 align-self-center" >
+                <div class="row align-items-center" id="game-space">
+                    <p>start game condition<br>1.player count = 6<br> 2.paler >2 && player 6 all ready to play game</p>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="row h-75 ">
+                    <div class="col justify-content-between" id="players-list">
+                    </div>
+                </div>
+                <div class="row px-3">
+                    <button type="button" class="btn btn-primary" id="ready-button">Ready</button>
+                </div>
+            </div>
         </div>
     </div>
-    <aside>
-        <div class="row row-cols-1">
-            <div class="col" id="message">1</div>
-            <div class="col " id="players-list"><p>name: <span></span></p></div>
-        </div>
-        <button id="ready-button">Ready</button>
-    </aside>
-    <footer>
+
+    <footer class=" text-white text-start " id="game-message">
         <p id="message-area">Messages will appear here...</p>
     </footer>
     <script src="/javascript/gameRoom.js"></script>

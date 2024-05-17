@@ -1,32 +1,98 @@
 /* styles.css */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap');
+
 body {
-  font-family: Arial, sans-serif;
+    font-family: 'Noto Sans TC', sans-serif;
+    background-color: #f0f4f8;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+}
+
+header {
+    background-color: #1f2937;
+    color: #fff;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+header p {
+    margin: 0;
+}
+
+.container-fluid {
+    height: calc(100vh - 60px); /* Adjust height based on header */
+    padding: 0;
+    flex: 1;
 }
 
 #lobby {
-  display: flex;
-  justify-content: space-between;
-  padding: 20px;
+
+    height: 100%;
+    width: 100%;
+    padding: 20px;
+    background-color: #e0f7fa;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 #rooms {
-  flex-grow: 1;
-  border-right: 1px solid #ccc;
-  padding-right: 20px;
+    background-color: #ffffff;
+    border: 1px solid #cfd8dc;
+    border-radius: 8px;
+    padding: 20px;
+    overflow-y: auto;
+    max-height: 75%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#rooms div {
+    padding: 10px;
+    border-bottom: 1px solid #eceff1;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+#rooms div:hover {
+    background-color: #0288d1;
+    color: #fff;
 }
 
 #rooms div.selected {
-  border: 2px solid blue;
-  padding: 5px;
+    background-color: #0288d1;
+    color: #fff;
+    border: none;
 }
 
 #controls {
-  flex-basis: 200px;
-  padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
 }
 
-button {
-  display: block;
-  margin: 10px 0;
-  width: 100%;
+#controls input, #controls button {
+    width: 100%;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #cfd8dc;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+#controls input:focus, #controls button:hover {
+    border-color: #0288d1;
+}
+
+#controls button {
+    background-color: #0288d1;
+    color: #fff;
+    cursor: pointer;
+    border: none;
+}
+
+#controls button:hover {
+    background-color: #0277bd;
 }

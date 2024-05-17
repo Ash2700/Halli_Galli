@@ -31,7 +31,9 @@ document.addEventListener('DOMContentLoaded', function () {
   // 加入房間
   document.getElementById('joinRoom').addEventListener('click', () => {
     const roomId = selectedRoomId;
-    socket.emit('joinRoom', { roomId, playerId, playerName });
+    if(roomId) {
+      socket.emit('joinRoom', { roomId, playerId, playerName });
+    }
   });
   
   // 進入遊戲房間
