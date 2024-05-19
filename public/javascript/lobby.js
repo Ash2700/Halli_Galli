@@ -1,33 +1,31 @@
 
-// app.js
-const playerId = getCookie('playerId')
-const playerName = getCookie('playerName')
+const sessionID = localStorage.getItem("sessionID")
+const playerId = localStorage.getItem("playerId") 
+const playerName = localStorage.getItem("playerName")
+const roomId = localStorage.getItem('joinRoom') ? localStorage.getItem('joinRoom'): null
 
 document.getElementById('show-id').innerHTML = playerId
 document.getElementById('show-name').innerHTML = playerName
 
-
-function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
-}
-
 document.addEventListener('DOMContentLoaded', function () {
-  
   const socket = io();
+  socket.auth= { sessionID, roomId }
+  socket.on('connect', () => {
+    console.log('connect lobby', playerId)
+    try {
+      socket.emit('lobby')
+    } catch (err) { console.error(err)}
 
-  // socket 建立
-  socket.emit('lobby', () => {
-    console.log('Connected to lobby');
-  });
-  
-  socket.on('message', (data) => {
-    console.log('Message from server:', data);
-  });
-  socket.emit('callRooms',() => {
-    console.log('give Rooms')
   })
+
+  // 建立房間
+  const createRoomButton = document.getElementById('createRoom');
+  const newRoomNameInput = document.getElementById('newRoomName');
+  createRoomButton.addEventListener('click', () => {
+    const name = newRoomNameInput.value;
+    socket.emit('createRoom', { name, hostId:playerId, playerName });
+  });
+
   // 加入房間
   document.getElementById('joinRoom').addEventListener('click', () => {
     const roomId = selectedRoomId;
@@ -38,18 +36,14 @@ document.addEventListener('DOMContentLoaded', function () {
   
   // 進入遊戲房間
   socket.on('joinRoomResponse',(response)=>{
+    localStorage.setItem('joinRoom', response.roomId)
+    console.log(response.roomId) 
     if(response.success){
       window.location.href = `/gameRoom.html?roomId=${response.roomId}`
     }else console.log(response.message)
   })
   
-  // 建立房間
-  const createRoomButton = document.getElementById('createRoom');
-  const newRoomNameInput = document.getElementById('newRoomName');
-  createRoomButton.addEventListener('click', () => {
-    const name = newRoomNameInput.value;
-    socket.emit('createRoom', { name, hostId:playerId, playerName });
-  });
+  
   
   // 更新大廳資訊
   const roomsContainer = document.getElementById('rooms');

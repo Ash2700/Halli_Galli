@@ -1,7 +1,5 @@
 const express = require('express')
 const router = express.Router()
-const {Player} = require('../games/index')
-
 
 const {v4: uuidv4} = require('uuid')
 router.post('/enter',(req, res) => {

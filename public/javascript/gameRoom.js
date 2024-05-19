@@ -1,16 +1,12 @@
-const playerId = getCookie('playerId')
-const playerName = getCookie('playerName')
+const sessionID = localStorage.getItem("sessionID")
+const playerId = localStorage.getItem("playerId")
+const playerName = localStorage.getItem("playerName")
+const roomId = localStorage.getItem('joinRoom') ? localStorage.getItem('joinRoom') : null
 
 document.getElementById('show-id').innerHTML = playerId
 document.getElementById('show-name').innerHTML = playerName
-const urlParams = new URLSearchParams(window.location.search)
-const roomId = urlParams.get('roomId')
 document.getElementById('show-roomId').innerHTML = roomId
-function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
-}
+
 function updateCardArea(players, playerIndex) {
   let deckLeft = ''
   let deckRight = ''
@@ -84,23 +80,23 @@ function updateFlipArea(cards) {
 
 document.addEventListener('DOMContentLoaded', () => {
   const socket = io()
+  socket.auth = { sessionID, roomId }
   socket.on('connect', () => {
-    console.log('connect', socket.id)
-    if (roomId) socket.emit('updateTheRoom', roomId, playerId)
+    console.log(`connect room: NO.${roomId}`, playerName)
+    try {
+      socket.emit('updateTheRoom', roomId, playerId)
+    } catch (err) { console.error(err) }
+
   })
 
   socket.on('disconnect', () => {
-    socket.emit('leaveRoom', { roomId, playerId })
   })
+  // socket.emit('leaveRoom', { roomId, playerId })
 
   // 玩家準備好
   document.getElementById('ready-button').addEventListener('click', () => {
     socket.emit('playerReady', { playerId, roomId })
   })
-
-  socket.on('updateTheRoom', ((length, cardData) => {
-    console.log('here')
-  }))
 
   const gameArea = document.getElementById('game-space')
   socket.on('updateTheGame', (players, cards, index) => {
@@ -163,8 +159,11 @@ ${cardDeck[1]}
 
     return fixWord
   }
+
   // 更新房間的玩家清單
   socket.on('renderPlayerList', players => {
+    console.log(2)
+    console.log(players)
     if (!players) return
     const content = renderPlayerList(players)
     playerList.innerHTML = content
@@ -184,5 +183,9 @@ ${cardDeck[1]}
   socket.on('renderMessage', messages => {
     const renderContent = renderMessage(messages)
     message.innerHTML = renderContent
+  })
+
+  socket.on('connect_error', (err) => {
+    console.log(err)
   })
 })
