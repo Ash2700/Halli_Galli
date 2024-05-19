@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
     socket.auth = { playerName }
     socket.connect()
 
-    socket.on('session',({sessionID, playerId})=> {
+    socket.on('session',({sessionID, playerId,playerName})=> {
       localStorage.setItem("sessionID",sessionID)
       localStorage.setItem("playerId",playerId)
       localStorage.setItem("playerName",playerName)

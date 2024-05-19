@@ -9,16 +9,18 @@ const roomController = {
   },
 
   joinRoom: async (roomId, playerId, playerName) => {
+    console.log('controller join start')
     return Promise.all([
       roomManager.joinRoom(roomId, playerId, playerName),
       roomManager.getRooms(),
       roomManager.checkIfReadyToStart(roomId)
-    ]).then(([room,rooms,isStartGame]) => {
+    ]).then(async ([room, rooms, isStartGame]) => {
+      console.log('isStartGame',isStartGame)
       if (isStartGame) {
-        const  game =  roomManager.getTheGame(roomId)
+        const game = await roomManager.getTheGameData(roomId)
         return { room, rooms, game }
       }
-      else return {room, rooms}
+      else return { room, rooms }
     }).catch(err => err)
 
   },
@@ -29,30 +31,41 @@ const roomController = {
 
   playerReady: async (roomId, playerId) => {
     if (!roomId) throw new Error('some thing wrong: not roomId')
-    const game = await roomManager.getTheGame(roomId)
-  //防止遊戲中變更
-    if (!game) await roomManager.setPlayerReady(roomId, playerId, true)
-    const room = await roomManager.getTheRoom(roomId)
-    const isStartGame = await roomManager.checkIfReadyToStart(roomId)
-    if (isStartGame) game = await roomManager.getTheGame(roomId)
-    return { room, game}
+    let game = await roomManager.getTheGameData(roomId)
+    //防止遊戲中變更
+    if (!game) {
+      const room = await roomManager.setPlayerReady(roomId, playerId, true)
+      const isStartGame = await roomManager.checkIfReadyToStart(roomId)
+      console.log('controller player ready', isStartGame)
+      if (isStartGame) {
+        game = await roomManager.getTheGameData(roomId) || null
+        await console.log('controller palyer ready game', game)
+        return { room, game }
+      }
+      return { room }
+    }
   },
 
   flipCard: async (roomId, playerId) => {
-    const game = await roomManager.getTheGame(roomId)
-    game.playCard(playerId)
-    return  game
+    return roomManager.flipCard(roomId, playerId).then(() => {
+      const game = roomManager.getTheGameData(roomId)
+      return game
+    })
   },
 
   ringTheBell: async (roomId, playerId) => {
-    const game = roomManager.getTheGame(roomId)
-    game.ringTheBell(playerId)
-    return await game
+    roomManager.ringTheBell(roomId, playerId).then(() => {
+      const game = roomManager.getTheGameData(roomId)
+      return game
+    })
   },
 
-  updateTheRoom: async (roomId, playerId) => {
+  updateTheRoom: async roomId => {
+    console.log('room-controller update room', roomId)
     const room = await roomManager.getTheRoom(roomId)
-    const game = await roomManager.getTheGame(roomId)
+    console.log('room-controller update room', room)
+    const game = await roomManager.getTheGameData(roomId) || null
+    console.log('經過updatatheRoom', game)
     return { room, game }
   },
 

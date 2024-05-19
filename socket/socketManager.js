@@ -33,15 +33,20 @@ exports.init = (server) => {
   })
 
   io.on('connection', (socket) => {
-    const roomId = socket.handshake.auth.roomId
-    console.log(roomId)
+    const roomId = socket.handshake.auth.roomId || null
+    const playerId = socket.playerId || null
+    const playerName = socket.playerName || null
+    console.log('roomId:', roomId)
+    console.log('playerId:', playerId)
+    console.log('playerName:', playerName)
     if (roomId) socket.join(roomId)
 
 
     socket.emit('session', {
       sessionID: socket.sessionID,
       playerId: socket.playerId,
-      playerName: socket.playerName
+      playerName: socket.playerName,
+      roomId: roomId || null
     })
 
     socket.on('disconnect', (reason) => {
@@ -54,12 +59,13 @@ exports.init = (server) => {
     socket.on('lobby', () => {
       roomController.getRooms()
         .then(rooms => {
+          console.log('lobby retrun rooms', rooms)
           io.emit('updateRooms', rooms)
         }).catch(err => console.error(err))
     })
     // 建立新房間和加入
-    socket.on('createRoom', ({ name, hostId, playerName }) => {
-      roomController.createRoom(name, hostId, playerName)
+    socket.on('createRoom', ({ name }) => {
+      roomController.createRoom(name,  playerId , playerName)
         .then(({ room, rooms }) => {
           if (room) {
             socket.joinRoom = room.id.toString()
@@ -73,7 +79,9 @@ exports.init = (server) => {
 
     })
     // 加入
-    socket.on('joinRoom', ({ roomId, playerId, playerName }) => {
+    socket.on('joinRoom', ({ roomId }) => {
+      console.log('socketmanger joinroom data', roomId)
+      console.log('start join')
       roomController.joinRoom(roomId, playerId, playerName)
         .then(({ room, rooms, game }) => {
           if (room) {
@@ -84,71 +92,76 @@ exports.init = (server) => {
           }
           else socket.emit('joinRoomResponse', { success: false, message: 'Room does not exist or is full' })
           if (game) updateGameView(game, roomId)
+            console.log('start end')
         })
         .catch(error => console.error(error))
     })
 
-    socket.on('leaveRoom', ({ roomId, playerId }) => {
+    socket.on('leaveRoom', () => {
       roomController.leaveRoom(roomId, playerId)
         .then(result => console.log(`玩家${result}離開房間`))
         .catch(error => error)
     })
     // 以下遊戲房間
-    socket.on('playerReady', ({ playerId, roomId }) => {
+    socket.on('playerReady', () => {
       roomController.playerReady(roomId, playerId)
-        .then(({ room, game, isStartGame }) => {
+        .then(({ room, game }) => {
           // 更新房間
-          console.log(room)
+          console.log('socket pler ready',game)
           if (room) renderPlayerList(room)
           if (game) {
-            renderGameMessage(game, roomId)
-            updateGameView(game, roomId)
+            renderGameMessage(game)
+            updateGameView(game)
           }
         }).catch(error => error)
 
     })
     //重新連線後更新畫面
-    socket.on('updateTheRoom', async (roomId, playerId) => {
-      try {
-        const { room, game } = await roomController.updateTheRoom(roomId, playerId)
-        if (room) renderPlayerList(room)
-        if (game) {
-          updateGameView(game, roomId)
-          renderGameMessage(game, roomId)
-        }
-      }
-      catch (err) { err }
+    socket.on('updateTheRoom',  () => {
+      console.log('updateTheRoom request', roomId, playerId)
+      roomController.updateTheRoom(roomId)
+        .then(({ room, game }) => {
+          console.log('updataroom', room ,game)
+          if (room) renderPlayerList(room)
+          if (game) {
+            updateGameView(game)
+            renderGameMessage(game)
+          }
+        })
+        .catch(err => err)
 
     })
 
-    socket.on('flipCard', (roomId, playerId) => {
-      roomController.flipCard(roomId, playerId).then(game => {
-        updateGameView(game, roomId)
+    socket.on('flipCard', () => {
+    roomController.flipCard(roomId, playerId)
+    .then(game => {
+        updateGameView(game)
+        renderGameMessage(game)
       }).catch(error => console.error(error))
     })
-    socket.on('ringTheBell', (roomId, playerId) => {
-      try {
-        const game = roomController.ringTheBell(roomId, playerId)
-        const messages = game.getMessages()
-        io.to(Number(roomId)).emit('renderMessage', messages)
-        updateGameView(game, roomId)
-      } catch (error) { console.error(error) }
-
+    socket.on('ringTheBell', ( roomId, playerId) => {
+        roomController.ringTheBell(roomId, playerId)
+        .then(game => {
+          renderGameMessage(game)
+          updateGameView(game)
+        }).catch(err => next(err))
     })
 
     function renderPlayerList(room) {
       io.to(room.id.toString()).emit('renderPlayerList', room.players)
     }
-    function updateGameView(data, roomId) {
+    function updateGameView(data) {
+      console.log('socke man render game view',Boolean(data))
       if (!data) return
       const lastFlippedCards = data.lastFlippedCards
       const players = data.players
       const currentPlayersIndex = data.currentPlayerIndex
       io.to(roomId).emit('updateTheGame', players, lastFlippedCards, currentPlayersIndex)
     }
-    function renderGameMessage(game, roomId) {
+    function renderGameMessage(game) {
+      console.log('socke man render game messag',Boolean(game))
       if (!game) return
-      const messages = game.getMessages()
+      const messages = game.messages
       io.to(roomId).emit('renderMessage', messages)
     }
 

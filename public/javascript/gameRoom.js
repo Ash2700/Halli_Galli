@@ -83,9 +83,9 @@ document.addEventListener('DOMContentLoaded', () => {
   socket.auth = { sessionID, roomId }
   socket.on('connect', () => {
     console.log(`connect room: NO.${roomId}`, playerName)
-    try {
-      socket.emit('updateTheRoom', roomId, playerId)
-    } catch (err) { console.error(err) }
+    
+      socket.emit('updateTheRoom')
+    
 
   })
 
@@ -162,7 +162,6 @@ ${cardDeck[1]}
 
   // 更新房間的玩家清單
   socket.on('renderPlayerList', players => {
-    console.log(2)
     console.log(players)
     if (!players) return
     const content = renderPlayerList(players)

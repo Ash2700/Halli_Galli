@@ -1,14 +1,18 @@
 const MessageManager = require('../helpers/messageManager')
+const { v4: uuidv4 } = require('uuid')
 class Game {
-  constructor(id) {
-    this.id = id // 遊戲id
-    this.players = [] // 存玩家訊息
-    this.deck = [] // 牌推
-    this.currentPlayerIndex = -1 // 目前進行玩家的索引
-    this.isActive = false // 遊戲是否進行
-    this.tableCards = [],
-      this.lastFlippedCards = []
-      this.messages = new MessageManager()
+  constructor(data) {
+    this.id = data.id || uuidv4() // 遊戲id
+    this.players = data.players || [] // 存玩家訊息
+    this.deck = data.deck || [] // 牌推
+    this.currentPlayerIndex = data.currentPlayerIndex ?? -1 // 目前進行玩家的索引
+    this.isActive = data.isActive || false // 遊戲是否進行
+    this.tableCards = data.tableCards || []
+    this.lastFlippedCards = data.lastFlippedCards || []
+    this.messages = new MessageManager()
+    if (data.messages) {
+      data.messages.forEach(message => this.messages.addMessage(message))
+    }
   }
   // 加入玩家
   addPlayer(player) {
@@ -63,7 +67,7 @@ class Game {
   // 開始
   startGame() {
     if (this.players.length >= 2) {
-      this.isActive = true,
+      this.isActive = true
         this.messages.addMessage(`Game Start, 共有${this.players.length}名玩家參與`)
       this.initializeDeck()
       this.shuffleDeck()
@@ -75,7 +79,7 @@ class Game {
   }
   // 玩家翻牌
   playCard(playerId) {
-    if(!this.isActive) {
+    if (!this.isActive) {
       this.messages.addMessage(`遊戲已結束`)
       return
     }
@@ -84,14 +88,16 @@ class Game {
       return
     }
     const flippedCard = player.cards.shift()
+    console.log(flippedCard)
     this.tableCards.push(flippedCard)
     player.tableCardsCount++
+    console.log(this.currentPlayerIndex)
     this.lastFlippedCards[this.currentPlayerIndex] = flippedCard
     player.isFlipped = true
     this.updateTotal()
     this.nextPlayer()
   }
-  checkPlayerCardDeck(playerId) {
+  checkPlayerCardDeck() {
     this.players = this.players.filter(player => {
       if (player.cards.length > 0 || player.tableCardsCount > 0) {
         return true // 手上 和 桌上還有牌
@@ -118,7 +124,7 @@ class Game {
     const player = this.players[this.currentPlayerIndex]
     if (player.cards.length === 0 && player.tableCardsCount === 0) {
       const playerOut = this.gameOut(this.currentPlayerIndex)
-      console.log(`玩家${playerOut.name}出局`)
+      this.messages.addMessages(`玩家${playerOut.name}出局`)
       this.checkGameCondition()
       this.nextPlayer()
     }
@@ -127,7 +133,7 @@ class Game {
 
   // 按鈴
   ringTheBell(playerId) {
-    if(!this.isActive) {
+    if (!this.isActive) {
       this.messages.addMessage(`遊戲已結束`)
       return
     }
@@ -186,7 +192,7 @@ class Game {
       return
     }
   }
-  getMessages(){
+  getMessages() {
     const messages = this.messages.messages
     return messages
   }
@@ -199,7 +205,10 @@ class Game {
       this.messages.addMessage("遊戲意外結束，未達到正常的結束條件。")
     }
   }
-
+  static fromJSON(data) {
+    const game = JSON.parse(data)
+    return new Game(game)
+  }
 }
 class Player {
   constructor(id, name) {

@@ -17,29 +17,33 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch (err) { console.error(err)}
 
   })
-
+  socket.on('session',({sessionID, playerId,playerName,roomId})=> {
+    localStorage.setItem("sessionID",sessionID)
+    localStorage.setItem("playerId",playerId)
+    localStorage.setItem("playerName",playerName)
+    localStorage.setItem('joinRoom', roomId)
+  })
   // 建立房間
   const createRoomButton = document.getElementById('createRoom');
   const newRoomNameInput = document.getElementById('newRoomName');
   createRoomButton.addEventListener('click', () => {
     const name = newRoomNameInput.value;
-    socket.emit('createRoom', { name, hostId:playerId, playerName });
+    socket.emit('createRoom', {name});
   });
 
   // 加入房間
   document.getElementById('joinRoom').addEventListener('click', () => {
     const roomId = selectedRoomId;
     if(roomId) {
-      socket.emit('joinRoom', { roomId, playerId, playerName });
+      socket.emit('joinRoom', { roomId});
     }
   });
   
   // 進入遊戲房間
   socket.on('joinRoomResponse',(response)=>{
     localStorage.setItem('joinRoom', response.roomId)
-    console.log(response.roomId) 
     if(response.success){
-      window.location.href = `/gameRoom.html?roomId=${response.roomId}`
+      window.location.href = `/gameRoom.html`
     }else console.log(response.message)
   })
   
