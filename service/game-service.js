@@ -84,9 +84,13 @@ class Game {
       return
     }
     const player = this.players.find(p => p.id === playerId)
+    const currentPlayer = this.players[this.currentPlayerIndex]
+    const isSame = (playerId !== currentPlayer.id)
+    console.log(isSame,'ddd')
     if (!player  || player.isFlipped) {
       return
     }
+    if(playerId !== currentPlayer.id) return 
     if( player.cards.length === 0){
       this.nextPlayer()
     }
@@ -103,7 +107,7 @@ class Game {
       if (player.cards.length > 0 || player.tableCardsCount > 0) {
         return true // 手上 和 桌上還有牌
       } else {
-        this.messages.addMessage(`玩家 ${player.id} 出局`)
+        this.messages.addMessage(`玩家 ${player.name} 出局`)
         return false
       }
     })
@@ -168,7 +172,7 @@ class Game {
       if (player.cards.length > 0 || player.tableCardsCount > 0) {
         return true // 手上 和 桌上還有牌
       } else {
-        this.messages.addMessage(`玩家 ${player.id} 出局`)
+        this.messages.addMessage(`玩家 ${player.name} 出局`)
         return false
       }
     })
@@ -196,7 +200,7 @@ class Game {
   endGame(winner) {
     this.isActive = false
     if (winner) {
-      this.messages.addMessage(`遊戲結束。勝者是玩家 ${winner.id}，持有更多的牌。`)
+      this.messages.addMessage(`遊戲結束。勝者是玩家 ${winner.name}，持有更多的牌。`)
     } else {
       this.messages.addMessage("遊戲意外結束，未達到正常的結束條件。")
     }

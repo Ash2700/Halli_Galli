@@ -17,7 +17,9 @@ function updateCardArea(players, playerIndex) {
       <img src="/img/cropped_card_design.png" class="img-thumbnail" alt="card-back">
         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
     ${player.cards.length}
-        <span class="visually-hidden">unread messages
+        </span>
+        <span class="position-absolute bottom-0 start-100 translate-middle  rounded-pill badge bg-info text-dark">
+    ${player.name}
         </span>
     </div>`
     switch (index) {
@@ -104,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = `/lobby.html`
   })
   const gameArea = document.getElementById('game-space')
-  socket.on('updateTheGame', (players, cards, index) => {
+  socket.on('updateTheGame', (players, cards, index,isActiveGame) => {
     const cardDeck = updateCardArea(players, index)
     const flipped = updateFlipArea(cards)
     gameArea.innerHTML = `<div class="card-deck col text-center border  ">
@@ -146,8 +148,21 @@ ${cardDeck[1]}
     bell.addEventListener('click', () => {
       socket.emit('ringTheBell', roomId, playerId)
     })
+    //遊戲結束 跳出視窗確認去留
+    if (!isActiveGame) {
+      showExitPrompt();
+    }
   })
-
+  function showExitPrompt() {
+    const userChoice = confirm("遊戲已結束。你想要離開房間還是留下來？按確定離開，按取消留下來。");
+    if (userChoice) {
+      // 用戶選擇離開房間，重定向回大廳
+      socket.emit('leave-room')
+    } else {
+      // 用戶選擇留下來，初始化房間狀況
+      socket.emit('initializeRoom')
+    }
+  }
   const playerList = document.getElementById('players-list')
 
   function renderPlayerList(players) {

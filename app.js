@@ -24,8 +24,13 @@ app.use(errorHandler)
 
 const client = require('./helpers/redis')
 async function clearOldData() {
-  await client.del('rooms')
-  await client.del('games')
+  try {
+    await client.del('rooms')
+    await client.del('games')
+  } catch (error) {
+    console.error('Error clearing old data:', error)
+  }
+
 }
 
 clearOldData().then(() => {

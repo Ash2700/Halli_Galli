@@ -1,18 +1,23 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enter Game Lobby</title>
+    <link rel="stylesheet" href="/css/index.css">
     <script src="/socket.io/socket.io.js"></script>
 </head>
 <body>
-    <h1>Welcome to the Halli Galli</h1>
-    <form id="loginForm">
-        <input type="text" id="playerName" placeholder="Enter your name" required>
-        <button type="submit">Enter Lobby</button>
-    </form>
+    <div class="container">
+        <h1 class="title">Welcome to Halli Galli</h1>
+        <form id="loginForm" class="login-form">
+            <input type="text" id="playerName" placeholder="Enter your name" required class="input-field">
+            <button type="submit" class="btn">Enter Lobby</button>
+        </form>
+        <div class="footer">
+            <p>Enjoy the game!</p>
+        </div>
+    </div>
 
     <script src="/javascript/index.js"></script>
 </body>

@@ -46,12 +46,17 @@ const roomController = {
       return {room} 
     }
   },
+  initializeRoom: async(roomId, playerId)=> {
+  const room = await roomManager.initializeRoom(roomId, playerId)
+  return room
+  },
 
   flipCard: async (roomId, playerId) => {
-    return roomManager.flipCard(roomId, playerId).then(() => {
+    return roomManager.flipCard(roomId, playerId)
+    .then(() => {
       const game = roomManager.getTheGameData(roomId)
       return game
-    })
+    }).catch(err => err)
   },
 
   ringTheBell: async (roomId, playerId) => {

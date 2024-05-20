@@ -150,6 +150,16 @@ exports.init = (server) => {
         }).catch(err => console.error(err))
     })
 
+    socket.on('initializeRoom',()=> {
+      roomController.initializeRoom(roomId, playerId)
+        .then(({room}) => {
+          // 更新房間
+          console.log('init room', game, room)
+          if (room) renderPlayerList(room)
+          }
+        ).catch(error => error)
+    })
+
     function renderPlayerList(room) {
       io.to(room.id.toString()).emit('renderPlayerList', room.players)
     }
@@ -161,7 +171,7 @@ exports.init = (server) => {
       const currentPlayersIndex = data.currentPlayerIndex
       const isActiveGame = data.isActive
       console.log(isActiveGame)
-      io.to(roomId).emit('updateTheGame', players, lastFlippedCards, currentPlayersIndex)
+      io.to(roomId).emit('updateTheGame', players, lastFlippedCards, currentPlayersIndex,isActiveGame)
     }
     function renderGameMessage(game) {
       console.log('socke man render game messag', Boolean(game))
