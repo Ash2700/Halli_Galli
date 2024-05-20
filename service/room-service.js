@@ -16,7 +16,7 @@ class RoomManager {
     const isRePeatCreate = rooms.some(room => room.players.some(player => player.id === hostId))
     if (isRePeatCreate) throw new Error('Not rePeat create room or join room')
     const newRoom = {
-      id: rooms.length + 1,
+      id: uuidv4(),
       name, hostId,
       players: [
         {
@@ -37,9 +37,10 @@ class RoomManager {
 
   async leaveRoom(roomId, playerId) {
     const room = await this.getTheRoom(roomId);
-    if (!room) return;
+    if (!room) throw new Error('There are not exist')
     room.players = room.players.filter(player => player.id !== playerId);
     await client.hSet(this.roomsKey, room.id.toString(), JSON.stringify(room));
+    if(room.players.length === 0) client.hDel(this.roomsKey,room.id.toString())
     return room;
   }
 
@@ -54,8 +55,11 @@ class RoomManager {
     if (await this.isPlayerInOtherRooms(roomId, playerId)) throw new ERROR('repeat join room')
     //確認沒有重複加入
     const room = await this.getTheRoom(roomId)
+    const game = await this.getTheGameData(roomId)
+    if(game ) throw new Error('game is  starting') 
     console.log('contro-joinroom', room)
     const notRepeat = room.players.every(player => player.id !== playerId)
+    console.log(notRepeat)
     if (room && notRepeat && room.players.length < 6) {
       room.players.push({ id: playerId, name: playerName, readyToStart: false })
       client.hSet(this.roomsKey, room.id.toString(), JSON.stringify(room))
@@ -78,21 +82,22 @@ class RoomManager {
   // 追蹤開始條件
   async checkIfReadyToStart(roomId) {
     console.log('room serviec check start')
-    const room = await this.getTheRoom(roomId);
+    const room = await this.getTheRoom(roomId)
+    console.log('contorler chec雌 to star',room)
     const playerCount = room.players.length;
     const allAgreed = room.players.every(v => v.readyToStart === true);
-    const gameExists =  client.hExists(this.gamesKey, roomId.toString());
+    console.log('allAgreed',allAgreed)
+    const gameExists =await  client.hExists(this.gamesKey, roomId.toString());
     console.log('controller check start game exist', await gameExists)
-    if (await gameExists) return true;
+    if ( gameExists) return true;
     if (playerCount === 6 || (playerCount > 1 && playerCount < 6 && allAgreed)) {
-      await this.startGameProcess(roomId);
+      this.startGameProcess(room);
       return true;
     }
     return false;
   }
 
-  async startGameProcess(roomId) {
-    const room = await this.getTheRoom(roomId);
+  startGameProcess(room) {
     const newGame = new Game(uuidv4());
     room.players.forEach(player => {
       const newPlayer = new Player(player.id, player.name);
@@ -100,7 +105,7 @@ class RoomManager {
     });
     newGame.startGame();
     console.log('room service start game process', newGame)
-    return this.saveTheGame(roomId, newGame)
+    return this.saveTheGame(room.id, newGame)
   }
 
   async getTheGame(roomId) {

@@ -33,9 +33,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // 加入房間
   document.getElementById('joinRoom').addEventListener('click', () => {
-    const roomId = selectedRoomId;
-    if(roomId) {
-      socket.emit('joinRoom', { roomId});
+    const rId = selectedRoomId;
+    if(rId) {
+      socket.emit('joinRoom', { rId});
     }
   });
   

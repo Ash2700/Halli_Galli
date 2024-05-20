@@ -48,31 +48,33 @@ function updateFlipArea(cards) {
   let flipLeft = ''
   let flipRight = ''
   cards.forEach((card, index) => {
-    const element = `<div class="col my-3" style="max-height: 33%;">
+    if (card) {
+      const element = `<div class="col my-3" style="max-height: 33%;">
     <div class="flipped-card border d-flex flex-column justify-content-between" style="height: 21vh;">
         <div style="text-align: left;" class="m-2">${card.num}</div>
         <div style="text-align: center;">${card.fruit}</div>
         <div style="text-align: right;" class="m-2">${card.num}</div></div></div>`
-    switch (index) {
-      case 0:
-        flipLeft += element
-        break
-      case 2:
-        flipLeft += element
-        break
-      case 4:
-        flipLeft += element
-        break
-      case 1:
-        flipRight += element
-        break
-      case 3:
-        flipRight += element
-        break
-      case 5:
-        flipRight += element
-        break
+      switch (index) {
+        case 0:
+          flipLeft += element
+          break
+        case 2:
+          flipLeft += element
+          break
+        case 4:
+          flipLeft += element
+          break
+        case 1:
+          flipRight += element
+          break
+        case 3:
+          flipRight += element
+          break
+        case 5:
+          flipRight += element
+          break
 
+      }
     }
   })
   return [flipLeft, flipRight]
@@ -83,10 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
   socket.auth = { sessionID, roomId }
   socket.on('connect', () => {
     console.log(`connect room: NO.${roomId}`, playerName)
-    
-      socket.emit('updateTheRoom')
-    
-
+    socket.emit('updateTheRoom')
   })
 
   socket.on('disconnect', () => {
@@ -95,9 +94,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 玩家準備好
   document.getElementById('ready-button').addEventListener('click', () => {
-    socket.emit('playerReady', { playerId, roomId })
+    socket.emit('playerReady')
   })
-
+  document.getElementById('leave-button').addEventListener('click', () => {
+    socket.emit('leave-room')
+  })
+  socket.on('leaveRoomResponse', () => {
+    localStorage.setItem('joinRoom', null)
+    window.location.href = `/lobby.html`
+  })
   const gameArea = document.getElementById('game-space')
   socket.on('updateTheGame', (players, cards, index) => {
     const cardDeck = updateCardArea(players, index)

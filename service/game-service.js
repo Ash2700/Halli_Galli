@@ -11,7 +11,7 @@ class Game {
     this.lastFlippedCards = data.lastFlippedCards || []
     this.messages = new MessageManager()
     if (data.messages) {
-      data.messages.forEach(message => this.messages.addMessage(message))
+      data.messages.forEach(message => this.messages.reverseMessage(message))
     }
   }
   // 加入玩家
@@ -84,14 +84,15 @@ class Game {
       return
     }
     const player = this.players.find(p => p.id === playerId)
-    if (!player || player.cards.length === 0 || player.isFlipped) {
+    if (!player  || player.isFlipped) {
       return
     }
+    if( player.cards.length === 0){
+      this.nextPlayer()
+    }
     const flippedCard = player.cards.shift()
-    console.log(flippedCard)
     this.tableCards.push(flippedCard)
     player.tableCardsCount++
-    console.log(this.currentPlayerIndex)
     this.lastFlippedCards[this.currentPlayerIndex] = flippedCard
     player.isFlipped = true
     this.updateTotal()
@@ -120,15 +121,12 @@ class Game {
   }
 
   nextPlayer() {
+    if(!this.isActive) return 
+    this.checkPlayerCardDeck()
     this.currentPlayerIndex = (this.currentPlayerIndex + 1) % this.players.length
     const player = this.players[this.currentPlayerIndex]
-    if (player.cards.length === 0 && player.tableCardsCount === 0) {
-      const playerOut = this.gameOut(this.currentPlayerIndex)
-      this.messages.addMessages(`玩家${playerOut.name}出局`)
-      this.checkGameCondition()
-      this.nextPlayer()
-    }
     player.isFlipped = false
+    //檢查
   }
 
   // 按鈴
@@ -151,7 +149,7 @@ class Game {
       this.players.forEach(p => { p.tableCardsCount = resetCount })
       this.messages.addMessage(`玩家 ${player.name} 正確按鈴，收走了所有桌面上的牌。`)
       this.checkPlayerCardDeck()
-      this.checkGameCondition()
+      this.isGameContinue()
     } else {
       // 錯誤按鈴，給其他每個玩家一張牌作為懲罰
       const mistakePlayer = this.players.find(p => p.id === playerId)
@@ -159,15 +157,11 @@ class Game {
         if (p.id !== playerId && mistakePlayer.cards.length > 0) {
           p.cards.push(mistakePlayer.cards.pop());
         }
-      });
+      })
       this.messages.addMessage(`玩家 ${playerId} 按錯了鈴，向每位玩家發了一張牌作為懲罰。`)
     }
   }
   // 出局
-  gameOut() {
-    const whoOut = this.players.splice(position, 1)
-    return whoOut
-  }
 
   checkPlayersDecks() {
     this.players = this.players.filter((player) => {
@@ -180,7 +174,7 @@ class Game {
     })
   }
 
-  checkGameCondition() {
+  isGameContinue() {
     if (this.players.length === 2) {
       const [player1, player2] = this.players
       const totalCardsPlayer1 = player1.cards.length;
@@ -188,9 +182,11 @@ class Game {
       if (totalCardsPlayer1 !== totalCardsPlayer2) {
         const winner = totalCardsPlayer1 > totalCardsPlayer2 ? player1 : player2
         this.endGame(winner)
+        return false
       }
-      return
+      return true
     }
+    return true
   }
   getMessages() {
     const messages = this.messages.messages

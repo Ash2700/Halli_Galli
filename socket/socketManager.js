@@ -65,7 +65,7 @@ exports.init = (server) => {
     })
     // 建立新房間和加入
     socket.on('createRoom', ({ name }) => {
-      roomController.createRoom(name,  playerId , playerName)
+      roomController.createRoom(name, playerId, playerName)
         .then(({ room, rooms }) => {
           if (room) {
             socket.joinRoom = room.id.toString()
@@ -79,10 +79,10 @@ exports.init = (server) => {
 
     })
     // 加入
-    socket.on('joinRoom', ({ roomId }) => {
-      console.log('socketmanger joinroom data', roomId)
+    socket.on('joinRoom', ({ rId }) => {
+      console.log('socketmanger joinroom data', rId)
       console.log('start join')
-      roomController.joinRoom(roomId, playerId, playerName)
+      roomController.joinRoom(rId, playerId, playerName)
         .then(({ room, rooms, game }) => {
           if (room) {
             socket.joinRoom = room.id.toString()
@@ -92,14 +92,17 @@ exports.init = (server) => {
           }
           else socket.emit('joinRoomResponse', { success: false, message: 'Room does not exist or is full' })
           if (game) updateGameView(game, roomId)
-            console.log('start end')
+          console.log('start end')
         })
         .catch(error => console.error(error))
     })
 
-    socket.on('leaveRoom', () => {
+    socket.on('leave-room', () => {
       roomController.leaveRoom(roomId, playerId)
-        .then(result => console.log(`玩家${result}離開房間`))
+        .then(room => { 
+          renderPlayerList(room)
+          socket.emit('leaveRoomResponse')
+        })
         .catch(error => error)
     })
     // 以下遊戲房間
@@ -107,7 +110,7 @@ exports.init = (server) => {
       roomController.playerReady(roomId, playerId)
         .then(({ room, game }) => {
           // 更新房間
-          console.log('socket pler ready',game)
+          console.log('socket pler ready', game, room)
           if (room) renderPlayerList(room)
           if (game) {
             renderGameMessage(game)
@@ -117,11 +120,11 @@ exports.init = (server) => {
 
     })
     //重新連線後更新畫面
-    socket.on('updateTheRoom',  () => {
+    socket.on('updateTheRoom', () => {
       console.log('updateTheRoom request', roomId, playerId)
       roomController.updateTheRoom(roomId)
         .then(({ room, game }) => {
-          console.log('updataroom', room ,game)
+          console.log('updataroom', room, game)
           if (room) renderPlayerList(room)
           if (game) {
             updateGameView(game)
@@ -133,33 +136,35 @@ exports.init = (server) => {
     })
 
     socket.on('flipCard', () => {
-    roomController.flipCard(roomId, playerId)
-    .then(game => {
-        updateGameView(game)
-        renderGameMessage(game)
-      }).catch(error => console.error(error))
+      roomController.flipCard(roomId, playerId)
+        .then(game => {
+          updateGameView(game)
+          renderGameMessage(game)
+        }).catch(err => console.error(err))
     })
-    socket.on('ringTheBell', ( roomId, playerId) => {
-        roomController.ringTheBell(roomId, playerId)
+    socket.on('ringTheBell', (roomId, playerId) => {
+      roomController.ringTheBell(roomId, playerId)
         .then(game => {
           renderGameMessage(game)
           updateGameView(game)
-        }).catch(err => next(err))
+        }).catch(err => console.error(err))
     })
 
     function renderPlayerList(room) {
       io.to(room.id.toString()).emit('renderPlayerList', room.players)
     }
     function updateGameView(data) {
-      console.log('socke man render game view',Boolean(data))
+      console.log('socke man render game view', Boolean(data))
       if (!data) return
       const lastFlippedCards = data.lastFlippedCards
       const players = data.players
       const currentPlayersIndex = data.currentPlayerIndex
+      const isActiveGame = data.isActive
+      console.log(isActiveGame)
       io.to(roomId).emit('updateTheGame', players, lastFlippedCards, currentPlayersIndex)
     }
     function renderGameMessage(game) {
-      console.log('socke man render game messag',Boolean(game))
+      console.log('socke man render game messag', Boolean(game))
       if (!game) return
       const messages = game.messages
       io.to(roomId).emit('renderMessage', messages)

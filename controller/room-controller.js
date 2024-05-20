@@ -35,6 +35,7 @@ const roomController = {
     //防止遊戲中變更
     if (!game) {
       const room = await roomManager.setPlayerReady(roomId, playerId, true)
+      console.log('controller', room)
       const isStartGame = await roomManager.checkIfReadyToStart(roomId)
       console.log('controller player ready', isStartGame)
       if (isStartGame) {
@@ -42,7 +43,7 @@ const roomController = {
         await console.log('controller palyer ready game', game)
         return { room, game }
       }
-      return { room }
+      return {room} 
     }
   },
 
@@ -54,7 +55,7 @@ const roomController = {
   },
 
   ringTheBell: async (roomId, playerId) => {
-    roomManager.ringTheBell(roomId, playerId).then(() => {
+    return roomManager.ringTheBell(roomId, playerId).then(() => {
       const game = roomManager.getTheGameData(roomId)
       return game
     })
