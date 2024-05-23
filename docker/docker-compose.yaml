@@ -1,0 +1,15 @@
+version: '3'
+services:
+  gameapp:
+    image: halli-galli:latest
+    build: .
+    ports:
+      - "8080:3000"
+    environment:
+      PORT: 3000
+    command: [ "node", "app.js" ]
+secrets:
+  REDIS_HOST:
+    file: .env
+  REDIS_PASSWORD:
+    file: .env

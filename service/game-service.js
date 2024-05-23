@@ -86,11 +86,10 @@ class Game {
     const player = this.players.find(p => p.id === playerId)
     const currentPlayer = this.players[this.currentPlayerIndex]
     const isSame = (playerId !== currentPlayer.id)
-    console.log(isSame,'ddd')
     if (!player  || player.isFlipped) {
       return
     }
-    if(playerId !== currentPlayer.id) return 
+    if(isSame) return 
     if( player.cards.length === 0){
       this.nextPlayer()
     }

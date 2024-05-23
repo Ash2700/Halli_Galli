@@ -9,13 +9,11 @@ const roomController = {
   },
 
   joinRoom: async (roomId, playerId, playerName) => {
-    console.log('controller join start')
     return Promise.all([
       roomManager.joinRoom(roomId, playerId, playerName),
       roomManager.getRooms(),
       roomManager.checkIfReadyToStart(roomId)
     ]).then(async ([room, rooms, isStartGame]) => {
-      console.log('isStartGame',isStartGame)
       if (isStartGame) {
         const game = await roomManager.getTheGameData(roomId)
         return { room, rooms, game }
@@ -35,12 +33,9 @@ const roomController = {
     //防止遊戲中變更
     if (!game) {
       const room = await roomManager.setPlayerReady(roomId, playerId, true)
-      console.log('controller', room)
       const isStartGame = await roomManager.checkIfReadyToStart(roomId)
-      console.log('controller player ready', isStartGame)
       if (isStartGame) {
         game = await roomManager.getTheGameData(roomId) || null
-        await console.log('controller palyer ready game', game)
         return { room, game }
       }
       return {room} 
@@ -67,11 +62,8 @@ const roomController = {
   },
 
   updateTheRoom: async roomId => {
-    console.log('room-controller update room', roomId)
     const room = await roomManager.getTheRoom(roomId)
-    console.log('room-controller update room', room)
     const game = await roomManager.getTheGameData(roomId) || null
-    console.log('經過updatatheRoom', game)
     return { room, game }
   },
 

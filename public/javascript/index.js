@@ -16,14 +16,5 @@ document.addEventListener('DOMContentLoaded', function () {
       localStorage.setItem("playerName",playerName)
       window.location.href = '/lobby.html'
     })
-    // fetch('/enter', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/x-www-form-urlencoded',
-    //   },
-    //   body: `playerName=${encodeURIComponent(playerName)}`
-    // }).then(response => {
-    //   window.location.href = response.url;  // 重定向到大厅页面
-    // });
   });
 })

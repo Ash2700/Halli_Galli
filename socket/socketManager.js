@@ -36,9 +36,6 @@ exports.init = (server) => {
     const roomId = socket.handshake.auth.roomId || null
     const playerId = socket.playerId || null
     const playerName = socket.playerName || null
-    console.log('roomId:', roomId)
-    console.log('playerId:', playerId)
-    console.log('playerName:', playerName)
     if (roomId) socket.join(roomId)
 
 
@@ -59,7 +56,6 @@ exports.init = (server) => {
     socket.on('lobby', () => {
       roomController.getRooms()
         .then(rooms => {
-          console.log('lobby retrun rooms', rooms)
           io.emit('updateRooms', rooms)
         }).catch(err => console.error(err))
     })
@@ -80,8 +76,6 @@ exports.init = (server) => {
     })
     // 加入
     socket.on('joinRoom', ({ rId }) => {
-      console.log('socketmanger joinroom data', rId)
-      console.log('start join')
       roomController.joinRoom(rId, playerId, playerName)
         .then(({ room, rooms, game }) => {
           if (room) {
@@ -92,7 +86,6 @@ exports.init = (server) => {
           }
           else socket.emit('joinRoomResponse', { success: false, message: 'Room does not exist or is full' })
           if (game) updateGameView(game, roomId)
-          console.log('start end')
         })
         .catch(error => console.error(error))
     })
@@ -110,7 +103,6 @@ exports.init = (server) => {
       roomController.playerReady(roomId, playerId)
         .then(({ room, game }) => {
           // 更新房間
-          console.log('socket pler ready', game, room)
           if (room) renderPlayerList(room)
           if (game) {
             renderGameMessage(game)
@@ -121,10 +113,8 @@ exports.init = (server) => {
     })
     //重新連線後更新畫面
     socket.on('updateTheRoom', () => {
-      console.log('updateTheRoom request', roomId, playerId)
       roomController.updateTheRoom(roomId)
         .then(({ room, game }) => {
-          console.log('updataroom', room, game)
           if (room) renderPlayerList(room)
           if (game) {
             updateGameView(game)
@@ -154,7 +144,6 @@ exports.init = (server) => {
       roomController.initializeRoom(roomId, playerId)
         .then(({room}) => {
           // 更新房間
-          console.log('init room', game, room)
           if (room) renderPlayerList(room)
           }
         ).catch(error => error)
@@ -164,17 +153,14 @@ exports.init = (server) => {
       io.to(room.id.toString()).emit('renderPlayerList', room.players)
     }
     function updateGameView(data) {
-      console.log('socke man render game view', Boolean(data))
       if (!data) return
       const lastFlippedCards = data.lastFlippedCards
       const players = data.players
       const currentPlayersIndex = data.currentPlayerIndex
       const isActiveGame = data.isActive
-      console.log(isActiveGame)
       io.to(roomId).emit('updateTheGame', players, lastFlippedCards, currentPlayersIndex,isActiveGame)
     }
     function renderGameMessage(game) {
-      console.log('socke man render game messag', Boolean(game))
       if (!game) return
       const messages = game.messages
       io.to(roomId).emit('renderMessage', messages)

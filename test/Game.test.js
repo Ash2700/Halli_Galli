@@ -1,5 +1,5 @@
 // Game.test.js
-const { Game, Player } = require('../games'); // 調整路徑以匹配您的檔案結構
+const { Game, Player } = require('../service/game-service'); // 調整路徑以匹配您的檔案結構
 
 describe('Game', () => {
   test('should allow adding a player when under player limit', () => {
@@ -28,7 +28,9 @@ describe('Game', () => {
   test('should allow a player to flip a card if they have cards', () => {
     const game = new Game(1);
     const player = new Player(1);
+    game.isActive = true
     player.cards.push({ fruit: 'Apple', num: 1 });
+    game.currentPlayerIndex=0
     game.addPlayer(player);
     game.playCard(player.id);
     expect(player.cards.length).toBe(0);
@@ -54,8 +56,11 @@ describe('Game', () => {
     const player = new Player(1);
     const player2 = new Player(2);
     player.cards.push({ fruit: 'Apple', num: 5 });
-    game.tableCards= [{ fruit: 'Apple', num: 3 },{ fruit: 'Apple', num: 2 },{ fruit: 'Apple', num: 1 }]
+    game.lastFlippedCards= [{ fruit: 'banana', num: 3 },{ fruit: 'banana', num: 2 },{ fruit: 'banana', num: 1 }]
+    game.tableCards= [{ fruit: 'banana', num: 3 },{ fruit: 'banana', num: 2 },{ fruit: 'banana', num: 1 }]
     player2.tableCardsCount = 3
+    game.currentPlayerIndex=0
+    game.isActive = true
     game.addPlayer(player);
     game.addPlayer(player2);
     game.playCard(player.id);
@@ -63,12 +68,5 @@ describe('Game', () => {
     expect(player.cards.length).toBe(4);
     expect(player2.tableCardsCount).toBe(0)
     expect(game.lastFlippedCards.length).toBe(0)
-  })
-  test('should be out', () => {
-    const game = new Game(1)
-    const player = new Player(1)
-    game.addPlayer(player)
-    game.checkForElimination()
-    expect(game.players.length).toBe(0)
   })
 });

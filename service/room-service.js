@@ -31,7 +31,6 @@ class RoomManager {
 
   async getTheRoom(roomId) {
     const roomData = await client.hGet(this.roomsKey, roomId.toString())
-    console.log('room service get the room', roomData)
     return roomData ? JSON.parse(roomData) : null
   }
 
@@ -50,20 +49,16 @@ class RoomManager {
       room.players.some(player => player.id === playerId))
   }
   async joinRoom(roomId, playerId, playerName) {
-    console.log('room serviec join start')
     // 防止多房間加入
     if (await this.isPlayerInOtherRooms(roomId, playerId)) throw new Error('repeat join room')
     //確認沒有重複加入
     const room = await this.getTheRoom(roomId)
     const game = await this.getTheGameData(roomId)
     if (game) throw new Error('game is  starting')
-    console.log('contro-joinroom', room)
     const notRepeat = room.players.every(player => player.id !== playerId)
-    console.log(notRepeat)
     if (room && notRepeat && room.players.length < 6) {
       room.players.push({ id: playerId, name: playerName, readyToStart: false })
       client.hSet(this.roomsKey, room.id.toString(), JSON.stringify(room))
-      console.log('room-service-room', room)
       return room
     }
     else if (!notRepeat) return room
@@ -72,23 +67,17 @@ class RoomManager {
   //追蹤玩家是否要馬上遊戲
   async setPlayerReady(roomId, playerId) {
     const room = await this.getTheRoom(roomId)
-    console.log('room-servies settplay read room', room)
     const player = room.players.find(player => player.id === playerId)
-    console.log('room-servies settplay read player', player)
     player.readyToStart = !(player.readyToStart)
     client.hSet(this.roomsKey, room.id.toString(), JSON.stringify(room))
     return room
   }
   // 追蹤開始條件
   async checkIfReadyToStart(roomId) {
-    console.log('room serviec check start')
     const room = await this.getTheRoom(roomId)
-    console.log('contorler chec雌 to star', room)
     const playerCount = room.players.length;
     const allAgreed = room.players.every(v => v.readyToStart === true);
-    console.log('allAgreed', allAgreed)
     const gameExists = await client.hExists(this.gamesKey, roomId.toString());
-    console.log('controller check start game exist', await gameExists)
     if (gameExists) return true;
     if (playerCount === 6 || (playerCount > 1 && playerCount < 6 && allAgreed)) {
       this.startGameProcess(room);
@@ -104,19 +93,15 @@ class RoomManager {
       newGame.addPlayer(newPlayer);
     });
     newGame.startGame();
-    console.log('room service start game process', newGame)
     return this.saveTheGame(room.id, newGame)
   }
 
   async getTheGame(roomId) {
     const gameData = await client.hGet(this.gamesKey, roomId.toString());
-    console.log(gameData)
-    console.log(Game.fromJSON(gameData))
     return gameData ? Game.fromJSON(gameData) : null
   }
   async getTheGameData(roomId) {
     const gameData = await client.hGet(this.gamesKey, roomId.toString())
-    console.log('room service get game data', JSON.parse(gameData))
     return gameData ? JSON.parse(gameData) : null
   }
 
@@ -137,9 +122,7 @@ class RoomManager {
 
   async flipCard(roomId, playerId) {
     const game = await roomManager.getTheGame(roomId)
-    console.log('servies flip', game)
     game.playCard(playerId)
-    console.log('servies fliped', game)
     return this.saveTheGame(roomId, game)
   }
   async ringTheBell(roomId, playerId) {

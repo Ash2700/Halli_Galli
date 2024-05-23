@@ -182,7 +182,6 @@ ${cardDeck[1]}
 
   // 更新房間的玩家清單
   socket.on('renderPlayerList', players => {
-    console.log(players)
     if (!players) return
     const content = renderPlayerList(players)
     playerList.innerHTML = content
