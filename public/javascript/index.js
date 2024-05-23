@@ -4,8 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
   loginForm.addEventListener('submit', (event) => {
     event.preventDefault();  // 防止表单默认提交行为
     const playerName = document.getElementById('playerName').value;
-    const URL = "http://localhost:3000";
-    const socket = io(URL, { autoConnect: false });
+    const socket = io({ autoConnect: false });
 
     socket.auth = { playerName }
     socket.connect()
