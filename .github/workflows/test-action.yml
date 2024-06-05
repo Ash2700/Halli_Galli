@@ -37,7 +37,7 @@ jobs:
 
       - name: Build Docker image
         if: success()
-        run: docker build -t ash2700/halli-galli:latest -f docker/dockerfile-halli .
+        run: docker build -t ash2700/halli-galli -f docker/dockerfile-halli .
       - name: Login to Docker Hub 
         if: success()
         uses: docker/login-action@v2 
@@ -48,4 +48,4 @@ jobs:
         run: docker images
       - name: Push Docker image
         if: success()
-        run: docker push ash2700/halli-galli:lastest
+        run: docker push ash2700/halli-galli
