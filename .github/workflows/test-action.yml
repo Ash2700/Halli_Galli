@@ -1,5 +1,6 @@
 name: halli-galli-test
 on:
+  workflow_dispatch:
   push:
     branches:
       - 'main'
@@ -20,18 +21,20 @@ jobs:
           node-version: 18
       - name: npm insatall, test
         run: npm install
+
       - name: Set environment variables from Secrets
         run: |
           echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> $GITHUB_ENV
           echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> $GITHUB_ENV
           echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> $GITHUB_ENV
+
       - name: Run test
         run: npm test
         env:
           REDIS_HOST: ${{ secrets.REDIS_HOST }}
           REDIS_PORT: ${{ secrets.REDIS_PORT }}
           REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-          
+
       - name: Build Docker image
         if: success()
         run: docker build -t halli-galli -f docker/dockerfile-halli .
