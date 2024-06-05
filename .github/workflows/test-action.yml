@@ -48,4 +48,8 @@ jobs:
         run: docker images
       - name: Push Docker image
         if: success()
+<<<<<<< HEAD
         run: docker push ash2700/halli-galli
+=======
+        run: docker push ash2700/halli-galli
+>>>>>>> 394d188 (fix github action problem3)
