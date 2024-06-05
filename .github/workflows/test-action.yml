@@ -47,4 +47,4 @@ jobs:
   
       - name: Push Docker image
         if: success()
-        run: docker push ash2700/halli-galli
+        run: docker push halli-galli
